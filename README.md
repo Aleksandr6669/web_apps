@@ -41,20 +41,6 @@ flutter run
 
 This project leverages **GitHub Actions** for robust Continuous Integration (CI) and Continuous Delivery (CD) to ensure code quality and automate the build process. The workflow configurations are located in the `.github/workflows/` directory.
 
-### `ci.yaml`
-
-This workflow file defines the core CI pipeline for the project. It is triggered automatically on every `push` and `pull_request` to the `main` and `develop` branches.
-
-The primary job of this pipeline is to validate the integrity of the codebase by performing the following steps in a clean Ubuntu environment:
-
-1.  **Checkout Code:** Clones the repository to the runner machine.
-2.  **Set up Environment:** Configures the necessary Java and Flutter SDKs.
-3.  **Install Dependencies:** Runs `flutter pub get` to download all the required packages.
-4.  **Analyze Code:** Executes `flutter analyze` to check for static analysis errors, potential bugs, and style violations.
-5.  **Run Tests:** Runs the project's unit tests with `flutter test` to ensure that all existing functionality works as expected.
-
-This automated process helps catch issues early, maintain a high standard of code, and ensure that the main branches are always in a deployable state.
-
 ### `android_build.yml` (Manual Build)
 
 This workflow is designed to build the Android application and generate a release-ready App Bundle (`.aab`).
