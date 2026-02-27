@@ -8,6 +8,8 @@
 	<string>This app needs microphone access to record audio.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>This app needs access to your location to provide location-based services.</string>
+    <key>NSUserNotificationsUsageDescription</key>
+    <string>This app needs to send you notifications to keep you updated.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
