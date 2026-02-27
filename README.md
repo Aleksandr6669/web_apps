@@ -37,10 +37,6 @@ To run the application, use the following command with a connected device or an 
 flutter run
 ```
 
-## ⚙️ Automated Workflows (CI/CD) with GitHub Actions
-
-This project leverages **GitHub Actions** for robust Continuous Integration (CI) and Continuous Delivery (CD) to ensure code quality and automate the build process. The workflow configurations are located in the `.github/workflows/` directory.
-
 ### `android_build.yml` (Manual Build)
 
 This workflow is designed to build the Android application and generate a release-ready App Bundle (`.aab`).
