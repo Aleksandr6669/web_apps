@@ -8,22 +8,9 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:webview_flutter_android/webview_flutter_android.dart';
 
 void main() {
-  // Убедимся, что все инициализировано до запуска
   WidgetsFlutterBinding.ensureInitialized();
-  // Запрашиваем разрешения до запуска самого приложения
-  _setupPermissions();
-  
+  Permission.notification.request();
   runApp(const MyApp());
-}
-
-// Выносим эту функцию на верхний уровень, чтобы вызвать до runApp
-Future<void> _setupPermissions() async {
-  // Запрашиваем только необходимые разрешения
-  await Permission.notification.request();
-  await Permission.location.request(); 
-  if (defaultTargetPlatform == TargetPlatform.android) {
-    await Permission.sensors.request();
-  }
 }
 
 class MyApp extends StatelessWidget {
@@ -65,53 +52,76 @@ class _WebViewScreenState extends State<WebViewScreen> {
       })
       ..loadRequest(Uri.parse(_initialUrl));
 
-    if (controller.platform is AndroidWebViewController) {
-      final androidController = controller.platform as AndroidWebViewController;
-      
-      androidController.setGeolocationEnabled(true);
+    _configureAndroid(controller);
 
-      androidController.setOnShowFileSelector((FileSelectorParams params) async {
-        final result = await FilePicker.platform.pickFiles(
-          allowMultiple: params.mode == FileSelectorMode.openMultiple,
-        );
-        if (result != null) {
-          return result.paths.where((path) => path != null).map((path) => Uri.file(path!).toString()).toList();
-        }
-        return [];
-      });
-
-      androidController.setOnPlatformPermissionRequest(
-        (PlatformWebViewPermissionRequest request) async {
-          bool allPermissionsGranted = true;
-
-          for (final type in request.types) {
-            PermissionStatus status;
-            switch (type) {
-              case WebViewPermissionResourceType.camera:
-                status = await Permission.camera.request();
-                if (!status.isGranted) allPermissionsGranted = false;
-                break;
-              case WebViewPermissionResourceType.microphone:
-                status = await Permission.microphone.request();
-                if (!status.isGranted) allPermissionsGranted = false;
-                break;
-              default:
-                allPermissionsGranted = false;
-                break;
-            }
-          }
-
-          if (allPermissionsGranted) {
-            await request.grant();
-          } else {
-            await request.deny();
-          }
-        },
-      );
-    }
-    
     _controller = controller;
     _clearCacheIfOnline();
+  }
+
+  Future<void> _configureAndroid(WebViewController controller) async {
+    if (WebViewPlatform.instance is! AndroidWebViewPlatform) {
+      return;
+    }
+
+    // ВКЛЮЧАЕМ ОТЛАДКУ WEBVIEW (ИСПРАВЛЕНО)
+    await AndroidWebViewController.enableDebugging(true);
+
+    final androidController = controller.platform as AndroidWebViewController;
+
+    androidController.setOnPlatformPermissionRequest(
+      (PlatformWebViewPermissionRequest request) async {
+        if (kDebugMode) {
+          print('[WebView] Permission requested for: ${request.types.map((e) => e.name).join(', ')}');
+        }
+
+        bool allPermissionsGranted = true;
+
+        for (final type in request.types) {
+          final status = await _getPermissionStatus(type.name);
+          if (kDebugMode) {
+            print('[WebView] Permission status for ${type.name}: $status');
+          }
+          
+          if (!status.isGranted) {
+            allPermissionsGranted = false;
+            break;
+          }
+        }
+
+        if (kDebugMode) {
+          print('[WebView] Final decision: ${allPermissionsGranted ? "GRANT" : "DENY"}');
+        }
+
+        if (allPermissionsGranted) {
+          await request.grant();
+        } else {
+          await request.deny();
+        }
+      },
+    );
+
+    await androidController.setOnShowFileSelector((FileSelectorParams params) async {
+      final result = await FilePicker.platform.pickFiles(
+        allowMultiple: params.mode == FileSelectorMode.openMultiple,
+      );
+      if (result != null) {
+        return result.paths.where((path) => path != null).map((path) => Uri.file(path!).toString()).toList();
+      }
+      return [];
+    });
+  }
+
+  Future<PermissionStatus> _getPermissionStatus(String permissionName) async {
+    switch (permissionName) {
+      case 'geolocation':
+        return await Permission.location.request();
+      case 'camera':
+        return await Permission.camera.request();
+      case 'microphone':
+        return await Permission.microphone.request();
+      default:
+        return PermissionStatus.denied;
+    }
   }
 
   Future<void> _clearCacheIfOnline() async {
