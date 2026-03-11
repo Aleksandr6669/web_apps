@@ -39,11 +39,13 @@ class FatsecretService {
 
     final response = await http.post(
       Uri.parse(_baseUrl),
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+      },
       body: {
         'method': 'foods.search',
         'search_expression': query,
         'format': 'json',
-        'oauth_token': _accessToken,
       },
     );
 
@@ -67,11 +69,13 @@ class FatsecretService {
 
     final response = await http.post(
       Uri.parse(_baseUrl),
+      headers: {
+        'Authorization': 'Bearer $_accessToken',
+      },
       body: {
         'method': 'food.get.v2',
         'food_id': foodId,
         'format': 'json',
-        'oauth_token': _accessToken,
       },
     );
 
