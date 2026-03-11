@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+
+<html lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#00c753",
+                        "background-light": "#f5f8f7",
+                        "background-dark": "#0f2317",
+                    },
+                    fontFamily: {
+                        "display": ["Manrope", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "1rem",
+                        "lg": "2rem",
+                        "xl": "3rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Manrope', sans-serif;
+        }
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="max-w-md mx-auto bg-background-light dark:bg-background-dark pb-24">
+<!-- Header -->
+<header class="flex items-center justify-between px-6 py-4">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-3xl">calendar_today</span>
+<h1 class="text-xl font-extrabold tracking-tight">Сегодня</h1>
+</div>
+<div class="flex gap-3">
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="w-10 h-10 flex items-center justify-center rounded-full bg-primary/10 text-primary">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+</header>
+<!-- Main Progress Section -->
+<section class="px-6 py-4">
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-8 shadow-sm border border-primary/5 flex flex-col items-center relative overflow-hidden">
+<!-- Large Circular Progress -->
+<div class="relative flex items-center justify-center w-64 h-64">
+<svg class="w-full h-full">
+<circle class="text-slate-100 dark:text-slate-700 stroke-current" cx="128" cy="128" fill="transparent" r="110" stroke-width="12"></circle>
+<circle class="text-primary stroke-current progress-ring-circle" cx="128" cy="128" fill="transparent" r="110" stroke-linecap="round" stroke-width="12" style="stroke-dasharray: 691; stroke-dashoffset: 228;"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center text-center">
+<span class="text-5xl font-black text-slate-900 dark:text-white">1 420</span>
+<span class="text-slate-500 dark:text-slate-400 font-medium uppercase tracking-wider text-xs">осталось ккал</span>
+</div>
+</div>
+<!-- Stats Breakdown -->
+<div class="grid grid-cols-3 w-full mt-8 gap-4 border-t border-slate-50 dark:border-slate-700/50 pt-6">
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-primary mb-1">restaurant</span>
+<span class="text-lg font-bold">840</span>
+<span class="text-[10px] text-slate-400 uppercase font-semibold">Еда</span>
+</div>
+<div class="flex flex-col items-center border-x border-slate-50 dark:border-slate-700/50">
+<span class="material-symbols-outlined text-orange-500 mb-1">fitness_center</span>
+<span class="text-lg font-bold">160</span>
+<span class="text-[10px] text-slate-400 uppercase font-semibold">Упр-ия</span>
+</div>
+<div class="flex flex-col items-center">
+<span class="material-symbols-outlined text-blue-500 mb-1">flag</span>
+<span class="text-lg font-bold">2 100</span>
+<span class="text-[10px] text-slate-400 uppercase font-semibold">Цель</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Macronutrients -->
+<section class="px-6 py-2 grid grid-cols-3 gap-3">
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl shadow-sm border border-primary/5">
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-bold text-slate-500">Углеводы</span>
+<span class="text-[10px] text-primary font-bold">50%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-primary" style="width: 50%"></div>
+</div>
+<p class="mt-2 text-xs font-bold">120г <span class="text-slate-400 font-normal">/ 250г</span></p>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl shadow-sm border border-primary/5">
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-bold text-slate-500">Белки</span>
+<span class="text-[10px] text-orange-400 font-bold">40%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-orange-400" style="width: 40%"></div>
+</div>
+<p class="mt-2 text-xs font-bold">60г <span class="text-slate-400 font-normal">/ 150г</span></p>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl shadow-sm border border-primary/5">
+<div class="flex justify-between items-end mb-2">
+<span class="text-xs font-bold text-slate-500">Жиры</span>
+<span class="text-[10px] text-blue-400 font-bold">65%</span>
+</div>
+<div class="h-1.5 w-full bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-blue-400" style="width: 65%"></div>
+</div>
+<p class="mt-2 text-xs font-bold">45г <span class="text-slate-400 font-normal">/ 70г</span></p>
+</div>
+</section>
+<!-- Meals Section -->
+<section class="px-6 py-6">
+<div class="flex items-center justify-between mb-4">
+<h2 class="text-xl font-extrabold tracking-tight">Приемы пищи</h2>
+<button class="text-primary text-sm font-bold">История</button>
+</div>
+<div class="space-y-3">
+<!-- Breakfast Card -->
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl shadow-sm flex items-center justify-between border border-primary/5">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-orange-100 dark:bg-orange-500/20 flex items-center justify-center text-orange-500">
+<span class="material-symbols-outlined">wb_sunny</span>
+</div>
+<div>
+<h3 class="font-bold">Завтрак</h3>
+<p class="text-xs text-slate-500 font-medium">Рекомендовано: 450 - 600 ккал</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right">
+<span class="block font-bold">320 ккал</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Lunch Card -->
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl shadow-sm flex items-center justify-between border border-primary/5">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined">lunch_dining</span>
+</div>
+<div>
+<h3 class="font-bold">Обед</h3>
+<p class="text-xs text-slate-500 font-medium">Рекомендовано: 600 - 800 ккал</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right">
+<span class="block font-bold">520 ккал</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Dinner Card -->
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl shadow-sm flex items-center justify-between border border-primary/5 opacity-80">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-500">
+<span class="material-symbols-outlined">nights_stay</span>
+</div>
+<div>
+<h3 class="font-bold">Ужин</h3>
+<p class="text-xs text-slate-500 font-medium">Рекомендовано: 450 - 600 ккал</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right">
+<span class="block font-bold text-slate-400">0 ккал</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+<!-- Snack Card -->
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl shadow-sm flex items-center justify-between border border-primary/5 opacity-80">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-lg bg-pink-100 dark:bg-pink-500/20 flex items-center justify-center text-pink-500">
+<span class="material-symbols-outlined">cookie</span>
+</div>
+<div>
+<h3 class="font-bold">Перекус</h3>
+<p class="text-xs text-slate-500 font-medium">Рекомендовано: 150 - 250 ккал</p>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<div class="text-right">
+<span class="block font-bold text-slate-400">0 ккал</span>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-lg shadow-primary/20">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-t border-slate-100 dark:border-slate-800 px-6 py-3 pb-6 z-50">
+<div class="max-w-md mx-auto flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined !text-[28px] fill-[1]">menu_book</span>
+<span class="text-[10px] font-bold">Дневник</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined !text-[28px]">receipt_long</span>
+<span class="text-[10px] font-bold">Рецепты</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined !text-[28px]">analytics</span>
+<span class="text-[10px] font-bold">Анализ</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined !text-[28px]">person</span>
+<span class="text-[10px] font-bold">Профиль</span>
+</a>
+</div>
+</nav>
+</body></html>

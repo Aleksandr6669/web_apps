@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+
+<html class="light" lang="ru"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Поиск продуктов - Yazio Style</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#0df259",
+                        "background-light": "#f5f8f6",
+                        "background-dark": "#102216",
+                    },
+                    fontFamily: {
+                        "display": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+<!-- Top Header -->
+<header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 pt-6 pb-2">
+<div class="flex items-center justify-between mb-4">
+<button class="flex items-center justify-center size-10 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h1 class="text-xl font-bold tracking-tight">Поиск продуктов</h1>
+<button class="flex items-center justify-center size-10 rounded-full hover:bg-primary/10 transition-colors">
+<span class="material-symbols-outlined">help_outline</span>
+</button>
+</div>
+<!-- Search Bar -->
+<div class="relative group">
+<div class="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none text-slate-400 group-focus-within:text-primary">
+<span class="material-symbols-outlined">search</span>
+</div>
+<input class="block w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-800 border-none rounded-full ring-1 ring-slate-200 dark:ring-slate-700 focus:ring-2 focus:ring-primary shadow-sm text-base placeholder:text-slate-400" placeholder="Найти еду или бренд..." type="text"/>
+</div>
+</header>
+<!-- Quick Actions Grid -->
+<main class="flex-1 overflow-y-auto px-4 py-6 space-y-8">
+<section>
+<div class="grid grid-cols-3 gap-3">
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm hover:border-primary transition-all group">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 group-hover:bg-primary/20">
+<span class="material-symbols-outlined text-primary">barcode_scanner</span>
+</div>
+<span class="text-xs font-semibold text-center">Сканер</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm hover:border-primary transition-all group">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 group-hover:bg-primary/20">
+<span class="material-symbols-outlined text-primary">auto_awesome</span>
+</div>
+<span class="text-xs font-semibold text-center">AI Поиск</span>
+</button>
+<button class="flex flex-col items-center justify-center p-4 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 shadow-sm hover:border-primary transition-all group">
+<div class="size-12 rounded-full bg-primary/10 flex items-center justify-center mb-2 group-hover:bg-primary/20">
+<span class="material-symbols-outlined text-primary">image</span>
+</div>
+<span class="text-xs font-semibold text-center">Галерея</span>
+</button>
+</div>
+</section>
+<!-- Recent Searches -->
+<section>
+<div class="flex items-center justify-between mb-3">
+<h3 class="text-lg font-bold">Недавние поиски</h3>
+<button class="text-sm font-medium text-primary">Очистить</button>
+</div>
+<div class="space-y-1">
+<div class="flex items-center gap-4 p-3 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-slate-400">history</span>
+<div class="flex-1">
+<p class="font-medium">Овсяные хлопья «Ясно Солнышко»</p>
+<p class="text-xs text-slate-500">340 ккал / 100г</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</div>
+<div class="flex items-center gap-4 p-3 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-slate-400">history</span>
+<div class="flex-1">
+<p class="font-medium">Кофе Латте без сахара</p>
+<p class="text-xs text-slate-500">89 ккал / 250мл</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</div>
+<div class="flex items-center gap-4 p-3 hover:bg-slate-100 dark:hover:bg-slate-800/50 rounded-lg cursor-pointer">
+<span class="material-symbols-outlined text-slate-400">history</span>
+<div class="flex-1">
+<p class="font-medium">Авокадо Хаас</p>
+<p class="text-xs text-slate-500">160 ккал / 100г</p>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</div>
+</div>
+</section>
+<!-- Favorite AI Results -->
+<section class="pb-24">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-primary" style="font-variation-settings: 'FILL' 1;">stars</span>
+<h3 class="text-lg font-bold">Избранное AI</h3>
+</div>
+<div class="flex gap-4 overflow-x-auto pb-4 no-scrollbar">
+<div class="min-w-[160px] bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700">
+<img class="w-full h-24 object-cover" data-alt="Салат с курицей и овощами" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBI-2xPkb2obBj94Qxh78vWvfNZrj1QjU87RRTNu_plxddoWhugd2mh7J0u5WEz8lgeYa1E7CQ7qqJmtT0DXpzqDLWE2_wxzCz2t8cI5JIXB47hauvVN4GjEuhmiuKA6-6Z3e93qZlaleqKTLCznX9Cg_6VbF20mg8ezZ5oXDATrQtTWrMBYLmCq183FZbqcjYLtGuRG17R2VWU8OvcprDIdseP5Y3HmIH_yiiN4eawy3Eqjj2opG3EwWLKFym6GDPYaiSRMg5sS7Y"/>
+<div class="p-3">
+<p class="text-sm font-bold truncate">Цезарь Салат</p>
+<p class="text-xs text-primary font-semibold">425 ккал</p>
+</div>
+</div>
+<div class="min-w-[160px] bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700">
+<img class="w-full h-24 object-cover" data-alt="Боул с лососем и рисом" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBNfkdO-85gDhsXJy4xhHlbj9L5x8bCm5mezq2VR0YF45z6951r9rpuWzdAPL7Ug5vNnfFFgVG4x6yE1rLvkEEi3Jhu5LNYl1s07oo_5UlRhsohScBhG9mRUGftC8LdjnlOn-8xOPJbysxt4gdVN_DoXlubkimrqg1x4Eq9c3NOe4_tKWKGU1qBcVrZwn8xPLYuqSYFi5U9AlIc8vQke45mlVEYvyEWmYiL6cjEz1lFItsX5So_ttimPvs7SUEoDcPAm2x0DNMLkTo"/>
+<div class="p-3">
+<p class="text-sm font-bold truncate">Поке Боул</p>
+<p class="text-xs text-primary font-semibold">512 ккал</p>
+</div>
+</div>
+<div class="min-w-[160px] bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-sm border border-slate-100 dark:border-slate-700">
+<img class="w-full h-24 object-cover" data-alt="Паста карбонара" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBkKHdU98Q53kuHd5SPorbyplZMQKSu_zXby4doDQwq9SBLbe4lfEB8I2_RtOz60mWWJHRC20uLOjxnaygiYLC27_cnDt9S4PeN7o8laYTt6jg3KIs9OyyB2hGdLOHVJ0wGqcZbrBORV2-CvxjlmcvWoCTpXGnBGCgAUaONFBN0U11WGEJDEEa3T__TSxxU_5CHuLWt96mteb0zTmGB263Ayv2QT5VilG7L-q3UJvq-OEVfPgO-zSxCT-1wUxj5V9__RmNHy1Do_Os"/>
+<div class="p-3">
+<p class="text-sm font-bold truncate">Паста Карбонара</p>
+<p class="text-xs text-primary font-semibold">680 ккал</p>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-0 right-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-slate-800 px-2 pb-6 pt-2">
+<div class="max-w-md mx-auto flex items-center justify-around">
+<a class="flex flex-col items-center gap-1 p-2 text-slate-400" href="#">
+<span class="material-symbols-outlined">menu_book</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Дневник</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">search</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Поиск</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-slate-400" href="#">
+<span class="material-symbols-outlined">insights</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Анализ</span>
+</a>
+<a class="flex flex-col items-center gap-1 p-2 text-slate-400" href="#">
+<span class="material-symbols-outlined">person</span>
+<span class="text-[10px] font-medium uppercase tracking-wider">Профиль</span>
+</a>
+</div>
+</nav>
+<style>
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</body></html>

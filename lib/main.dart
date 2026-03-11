@@ -1,276 +1,30 @@
+// This is a basic Flutter widget test.
+//
+// To perform an interaction with a widget in your test, use the WidgetTester
+// utility in the flutter_test package. For example, you can send tap and scroll
+// gestures. You can also use WidgetTester to find child widgets in the widget
+// tree, read text, and verify that the values of widget properties are correct.
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:material_symbols_icons/symbols.dart';
-import 'package:provider/provider.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart'; // This file will be generated
+import 'package:flutter_test/flutter_test.dart';
 
-import 'screens/home/home_screen.dart';
-import 'screens/profile/profile_screen.dart';
-import 'screens/analysis/analysis_screen.dart';
-import 'screens/search/search_screen.dart';
-import 'screens/recognition/recognition_screen.dart';
-import 'providers/diary_provider.dart';
+import 'package:myapp/main.dart';
 
-Future<void> main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-  try {
-    await dotenv.load(fileName: ".env");
-    await Firebase.initializeApp(
-      options: DefaultFirebaseOptions.currentPlatform,
-    );
-  } catch (e) {
-    debugPrint("Firebase initialization failed: $e");
-    // Handle errors, maybe show a fallback UI
-  }
+void main() {
+  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+    // Build our app and trigger a frame.
+    await tester.pumpWidget(const CalorieTrackerApp());
 
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => ThemeProvider()),
-        ChangeNotifierProvider(create: (context) => DiaryProvider()),
-      ],
-      child: const CalorieTrackerApp(),
-    ),
-  );
-}
+    // Verify that our counter starts at 0.
+    expect(find.text('0'), findsOneWidget);
+    expect(find.text('1'), findsNothing);
 
-//--------- THEME PROVIDER ---------//
+    // Tap the '+' icon and trigger a frame.
+    await tester.tap(find.byIcon(Icons.add));
+    await tester.pump();
 
-class ThemeProvider with ChangeNotifier {
-  ThemeMode _themeMode = ThemeMode.system;
-  ThemeMode get themeMode => _themeMode;
-
-  void toggleTheme() {
-    _themeMode =
-        _themeMode == ThemeMode.light ? ThemeMode.dark : ThemeMode.light;
-    notifyListeners();
-  }
-}
-
-//--------- APP ROUTER ---------//
-
-final _router = GoRouter(
-  initialLocation: '/',
-  routes: [
-    ShellRoute(
-      builder: (context, state, child) {
-        return MainScreen(child: child);
-      },
-      routes: [
-        GoRoute(
-          path: '/',
-          builder: (context, state) => const HomeScreen(),
-        ),
-        GoRoute(
-            path: '/search',
-            builder: (context, state) => const SearchScreen(),
-            routes: [
-              GoRoute(
-                path: 'recognition',
-                builder: (context, state) => const RecognitionScreen(),
-              ),
-            ]),
-        GoRoute(
-          path: '/analysis',
-          builder: (context, state) => const AnalysisScreen(),
-        ),
-        GoRoute(
-          path: '/profile',
-          builder: (context, state) => const ProfileScreen(),
-        ),
-      ],
-    ),
-  ],
-);
-
-//--------- APP ---------//
-
-class CalorieTrackerApp extends StatelessWidget {
-  const CalorieTrackerApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final themeProvider = Provider.of<ThemeProvider>(context);
-
-    return MaterialApp.router(
-      title: 'Calorie Tracker',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      darkTheme: AppTheme.darkTheme,
-      themeMode: themeProvider.themeMode,
-      routerConfig: _router,
-    );
-  }
-}
-
-//--------- MAIN SCREEN WITH BOTTOM NAV ---------//
-
-class MainScreen extends StatelessWidget {
-  final Widget child;
-  const MainScreen({super.key, required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: child,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _calculateSelectedIndex(context),
-        onTap: (index) => _onItemTapped(index, context),
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Theme.of(context).colorScheme.surface,
-        selectedItemColor: Theme.of(context).colorScheme.primary,
-        unselectedItemColor: Colors.grey,
-        showUnselectedLabels: true,
-        selectedFontSize: 12,
-        unselectedFontSize: 12,
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Symbols.menu_book),
-            label: 'Дневник',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Symbols.search),
-            label: 'Поиск',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Symbols.bar_chart),
-            label: 'Анализ',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Symbols.person),
-            label: 'Профиль',
-          ),
-        ],
-      ),
-    );
-  }
-
-  int _calculateSelectedIndex(BuildContext context) {
-    final String location = GoRouterState.of(context).uri.toString();
-    if (location.startsWith('/') && location.length == 1) {
-      return 0;
-    }
-    if (location.startsWith('/search')) {
-      return 1;
-    }
-    if (location.startsWith('/analysis')) {
-      return 2;
-    }
-    if (location.startsWith('/profile')) {
-      return 3;
-    }
-    return 0;
-  }
-
-  void _onItemTapped(int index, BuildContext context) {
-    switch (index) {
-      case 0:
-        GoRouter.of(context).go('/');
-        break;
-      case 1:
-        GoRouter.of(context).go('/search');
-        break;
-      case 2:
-        GoRouter.of(context).go('/analysis');
-        break;
-      case 3:
-        GoRouter.of(context).go('/profile');
-        break;
-    }
-  }
-}
-
-//--------- APP THEME ---------//
-
-class AppTheme {
-  static const Color _primaryColor = Color(0xFF00C753);
-  static const Color _backgroundLight = Color(0xFFF5F8F7);
-  static const Color _backgroundDark = Color(0xFF0F2317);
-
-  static final TextTheme _textTheme = TextTheme(
-    displayLarge: GoogleFonts.manrope(fontWeight: FontWeight.w800),
-    displayMedium: GoogleFonts.manrope(fontWeight: FontWeight.w800),
-    displaySmall: GoogleFonts.manrope(fontWeight: FontWeight.w800),
-    headlineLarge: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-    headlineMedium: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-    headlineSmall: GoogleFonts.manrope(fontWeight: FontWeight.w700),
-    titleLarge: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-    titleMedium: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-    titleSmall: GoogleFonts.manrope(fontWeight: FontWeight.w600),
-    bodyLarge: GoogleFonts.manrope(),
-    bodyMedium: GoogleFonts.manrope(),
-    bodySmall: GoogleFonts.manrope(),
-    labelLarge: GoogleFonts.manrope(fontWeight: FontWeight.w500),
-    labelMedium: GoogleFonts.manrope(fontWeight: FontWeight.w500),
-    labelSmall: GoogleFonts.manrope(fontWeight: FontWeight.w500),
-  );
-
-  static final ThemeData lightTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.light,
-    primaryColor: _primaryColor,
-    scaffoldBackgroundColor: _backgroundLight,
-    colorScheme: const ColorScheme.light(
-      primary: _primaryColor,
-      secondary: _primaryColor,
-      surface: Colors.white,
-    ),
-    textTheme: _textTheme,
-    appBarTheme: AppBarTheme(
-      backgroundColor: _backgroundLight,
-      elevation: 0,
-      titleTextStyle: _textTheme.headlineSmall?.copyWith(color: Colors.black),
-      iconTheme: const IconThemeData(color: Colors.black),
-    ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: Colors.white,
-      selectedItemColor: _primaryColor,
-      unselectedItemColor: Colors.grey[500],
-    ),
-    cardTheme: CardThemeData(
-      elevation: 0,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        //side: BorderSide(color: Colors.grey[200]!),
-      ),
-    ),
-  );
-
-  static final ThemeData darkTheme = ThemeData(
-    useMaterial3: true,
-    brightness: Brightness.dark,
-    primaryColor: _primaryColor,
-    scaffoldBackgroundColor: _backgroundDark,
-    colorScheme: const ColorScheme.dark(
-      primary: _primaryColor,
-      secondary: _primaryColor,
-      surface: Color(0xFF1A2C21),
-    ),
-    textTheme: _textTheme.apply(
-      bodyColor: Colors.white,
-      displayColor: Colors.white,
-    ),
-    appBarTheme: AppBarTheme(
-      backgroundColor: _backgroundDark,
-      elevation: 0,
-      titleTextStyle: _textTheme.headlineSmall?.copyWith(color: Colors.white),
-      iconTheme: const IconThemeData(color: Colors.white),
-    ),
-    bottomNavigationBarTheme: BottomNavigationBarThemeData(
-      backgroundColor: const Color(0xFF1A2C21),
-      selectedItemColor: _primaryColor,
-      unselectedItemColor: Colors.grey[400],
-    ),
-    cardTheme: CardThemeData(
-      elevation: 0,
-      color: const Color(0xFF1A2C21),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        // side: BorderSide(color: Colors.grey[800]!),
-      ),
-    ),
-  );
+    // Verify that our counter has incremented.
+    expect(find.text('0'), findsNothing);
+    expect(find.text('1'), findsOneWidget);
+  });
 }
