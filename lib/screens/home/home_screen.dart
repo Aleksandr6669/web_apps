@@ -3,6 +3,7 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'dart:math' as math;
 import '../../styles/app_colors.dart';
 import '../../styles/app_styles.dart';
+import '../meal_detail/meal_detail_screen.dart'; // Import the new screen
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -118,7 +119,7 @@ class _CaloriesCard extends StatelessWidget {
         const SizedBox(height: 8),
         Text(value, style: theme.textTheme.titleLarge?.copyWith(fontSize: 18, color: theme.colorScheme.onSurface)),
         const SizedBox(height: 2),
-        Text(label, style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, color: theme.textTheme.bodySmall?.color)),
+        Text(label, style: theme.textTheme.labelSmall?.copyWith(color: theme.textTheme.bodySmall?.color)),
       ],
     );
   }
@@ -161,13 +162,13 @@ class _MealsSection extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 16),
-          const _MealCard(name: 'Завтрак', recommended: '450 - 600', calories: '320', icon: Symbols.wb_sunny, iconBg: Color(0xFFFFF4E6), iconColor: Colors.orange, consumed: true),
+          _MealCard(name: 'Завтрак', recommended: '450 - 600', calories: '320', icon: Symbols.wb_sunny, iconBg: Color(0xFFFFF4E6), iconColor: Colors.orange, consumed: true),
           const SizedBox(height: 12),
-          const _MealCard(name: 'Обед', recommended: '600 - 800', calories: '520', icon: Symbols.lunch_dining, iconBg: Color(0xFFE6F9F0), iconColor: AppColors.primary, consumed: true),
+          _MealCard(name: 'Обед', recommended: '600 - 800', calories: '520', icon: Symbols.lunch_dining, iconBg: Color(0xFFE6F9F0), iconColor: AppColors.primary, consumed: true),
           const SizedBox(height: 12),
-          const _MealCard(name: 'Ужин', recommended: '450 - 600', calories: '0', icon: Symbols.nights_stay, iconBg: Color(0xFFEEF2FF), iconColor: Colors.indigo),
+          _MealCard(name: 'Ужин', recommended: '450 - 600', calories: '0', icon: Symbols.nights_stay, iconBg: Color(0xFFEEF2FF), iconColor: Colors.indigo),
           const SizedBox(height: 12),
-          const _MealCard(name: 'Перекус', recommended: '150 - 250', calories: '0', icon: Symbols.cookie, iconBg: Color(0xFFFCE7F3), iconColor: Colors.pink),
+          _MealCard(name: 'Перекус', recommended: '150 - 250', calories: '0', icon: Symbols.cookie, iconBg: Color(0xFFFCE7F3), iconColor: Colors.pink),
       ],
     );
   }
@@ -287,50 +288,65 @@ class _MealCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isNotEaten = calories == '0';
-    return Opacity(
-      opacity: isNotEaten ? 0.7 : 1.0,
-      child: Card(
-         shape: RoundedRectangleBorder(
-          borderRadius: AppStyles.cardRadius,
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            children: [
-              Container(
-                width: 52,
-                height: 52,
-                decoration: BoxDecoration(
-                  color: isNotEaten ? (theme.brightness == Brightness.light ? Colors.grey.shade100 : Colors.grey.shade800) : iconBg,
-                  borderRadius: AppStyles.mediumBorderRadius
+    return InkWell(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => MealDetailScreen(mealName: name)),
+        );
+      },
+      borderRadius: AppStyles.cardRadius,
+      child: Opacity(
+        opacity: isNotEaten ? 0.7 : 1.0,
+        child: Card(
+           shape: RoundedRectangleBorder(
+            borderRadius: AppStyles.cardRadius,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(12.0),
+            child: Row(
+              children: [
+                Container(
+                  width: 52,
+                  height: 52,
+                  decoration: BoxDecoration(
+                    color: isNotEaten ? (theme.brightness == Brightness.light ? Colors.grey.shade100 : Colors.grey.shade800) : iconBg,
+                    borderRadius: AppStyles.mediumBorderRadius
+                  ),
+                  child: Icon(icon, color: isNotEaten ? (theme.brightness == Brightness.light ? Colors.grey.shade400 : Colors.grey.shade600) : iconColor, size: 28),
                 ),
-                child: Icon(icon, color: isNotEaten ? (theme.brightness == Brightness.light ? Colors.grey.shade400 : Colors.grey.shade600) : iconColor, size: 28),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface)),
-                    const SizedBox(height: 2),
-                    Text('Реком: $recommended ккал', style: theme.textTheme.bodyMedium?.copyWith(fontSize: 10, color: theme.textTheme.bodySmall?.color)),
-                  ],
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(name, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface)),
+                      const SizedBox(height: 2),
+                      Text('Реком: $recommended ккал', style: theme.textTheme.bodyMedium?.copyWith(fontSize: 11, color: theme.textTheme.bodySmall?.color)),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(width: 16),
-              if (!isNotEaten)
-                Text('$calories ккал', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface)),
-              const SizedBox(width: 12),
-              Container(
-                width: 44, height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.primary,
-                  boxShadow: [BoxShadow(color: AppColors.primary.withAlpha(77), blurRadius: 10, spreadRadius: 2, offset: const Offset(0, 5))]
+                const SizedBox(width: 16),
+                if (!isNotEaten)
+                  Text('$calories ккал', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface)),
+                const SizedBox(width: 12),
+                InkWell(
+                  onTap: () {
+                     // TODO: Implement add food item functionality directly
+                  },
+                  borderRadius: BorderRadius.circular(22),
+                  child: Container(
+                    width: 44, height: 44,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.primary,
+                      boxShadow: [BoxShadow(color: AppColors.primary.withAlpha(77), blurRadius: 10, spreadRadius: 2, offset: const Offset(0, 5))]
+                    ),
+                    child: const Icon(Symbols.add, color: Colors.white, size: 28),
+                  ),
                 ),
-                child: const Icon(Symbols.add, color: Colors.white, size: 28),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
