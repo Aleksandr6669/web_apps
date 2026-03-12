@@ -197,7 +197,7 @@ class _MealsSection extends StatelessWidget {
           const _MealCard(name: 'Ужин', recommended: '450 - 600', calories: '0', icon: Symbols.nights_stay, iconBg: Color(0xFFEEF2FF), iconColor: Colors.indigo),
           const SizedBox(height: 12),
           const _MealCard(name: 'Перекус', recommended: '150 - 250', calories: '0', icon: Symbols.cookie, iconBg: Color(0xFFFCE7F3), iconColor: Colors.pink),
-          const SizedBox(height: 12),
+          const SizedBox(height: 18),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.center,
