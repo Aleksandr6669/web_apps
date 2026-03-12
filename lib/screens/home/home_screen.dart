@@ -3,10 +3,27 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'dart:math' as math;
 import '../../styles/app_colors.dart';
 import '../../styles/app_styles.dart';
-import '../meal_detail/meal_detail_screen.dart'; // Import the new screen
+import '../meal_detail/meal_detail_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _glassesDrunk = 3; 
+  final int _totalGlasses = 8;
+  final double _litersPerGlass = 0.25;
+
+  void _addGlass() {
+    if (_glassesDrunk < _totalGlasses) {
+      setState(() {
+        _glassesDrunk++;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -26,15 +43,19 @@ class HomeScreen extends StatelessWidget {
           const SizedBox(width: 16),
         ],
       ),
-      body: const SingleChildScrollView(
-        padding: EdgeInsets.fromLTRB(16, 0, 16, 120), // Increased bottom padding for Nav Bar
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
         child: Column(
           children: [
-            _CaloriesCard(),
-            SizedBox(height: 16),
-            _Macronutrients(),
-            SizedBox(height: 24),
-            _MealsSection(),
+            const _CaloriesCard(),
+            const SizedBox(height: 16),
+            const _Macronutrients(),
+            const SizedBox(height: 24),
+            _MealsSection(
+              glassesDrunk: _glassesDrunk,
+              litersPerGlass: _litersPerGlass,
+              onAddGlass: _addGlass,
+            ),
           ],
         ),
       ),
@@ -47,13 +68,16 @@ class HomeScreen extends StatelessWidget {
       height: 44,
       margin: const EdgeInsets.only(left: 8),
       decoration: BoxDecoration(
-        color: AppColors.primary.withAlpha(26), // 0.1 opacity
+        color: AppColors.primary.withAlpha(26),
         shape: BoxShape.circle,
       ),
       child: Icon(icon, color: AppColors.primary, size: 24),
     );
   }
 }
+
+
+// --- Rest of the widgets ---
 
 class _CaloriesCard extends StatelessWidget {
   const _CaloriesCard();
@@ -68,7 +92,7 @@ class _CaloriesCard extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           borderRadius: AppStyles.largeBorderRadius,
-          border: Border.all(color: AppColors.primary.withAlpha(26)) // 0.1 opacity
+          border: Border.all(color: AppColors.primary.withAlpha(26))
         ),
         child: Padding(
           padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
@@ -143,7 +167,11 @@ class _Macronutrients extends StatelessWidget {
 }
 
 class _MealsSection extends StatelessWidget {
-  const _MealsSection();
+  final int glassesDrunk;
+  final double litersPerGlass;
+  final VoidCallback onAddGlass;
+
+  const _MealsSection({required this.glassesDrunk, required this.litersPerGlass, required this.onAddGlass});
 
   @override
   Widget build(BuildContext context) {
@@ -169,12 +197,73 @@ class _MealsSection extends StatelessWidget {
           const _MealCard(name: 'Ужин', recommended: '450 - 600', calories: '0', icon: Symbols.nights_stay, iconBg: Color(0xFFEEF2FF), iconColor: Colors.indigo),
           const SizedBox(height: 12),
           const _MealCard(name: 'Перекус', recommended: '150 - 250', calories: '0', icon: Symbols.cookie, iconBg: Color(0xFFFCE7F3), iconColor: Colors.pink),
+          const SizedBox(height: 12),
+          _WaterCard(liters: (glassesDrunk * litersPerGlass), onAdd: onAddGlass),
+         
       ],
     );
   }
 }
 
-// --- Local Widgets for HomeScreen ---
+class _WaterCard extends StatelessWidget {
+  final double liters;
+  final VoidCallback onAdd;
+
+  const _WaterCard({required this.liters, required this.onAdd});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    const iconColor = Colors.blue;
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: AppStyles.cardRadius),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Row(
+          children: [
+            Container(
+              width: 52,
+              height: 52,
+              decoration: BoxDecoration(
+                color: iconColor.withAlpha(30),
+                borderRadius: AppStyles.mediumBorderRadius
+              ),
+              child: const Icon(Symbols.water_drop, color: iconColor, size: 28, fill: 1),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Вода', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface)),
+                  const SizedBox(height: 2),
+                  Text('Цель: 2.0 л', style: theme.textTheme.bodyMedium?.copyWith(fontSize: 11, color: theme.textTheme.bodySmall?.color)),
+                ],
+              ),
+            ),
+            const SizedBox(width: 16),
+            Text('${liters.toStringAsFixed(2)} л', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface)),
+            const SizedBox(width: 12),
+            InkWell(
+              onTap: onAdd,
+              borderRadius: BorderRadius.circular(22),
+              child: Container(
+                width: 44, height: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: iconColor,
+                   boxShadow: [BoxShadow(color: iconColor.withAlpha(100), blurRadius: 10, spreadRadius: 2, offset: const Offset(0, 5))]
+                ),
+                child: const Icon(Symbols.add, color: Colors.white, size: 28),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
 
 class _CircularProgress extends StatelessWidget {
   final double progress;
@@ -188,7 +277,7 @@ class _CircularProgress extends StatelessWidget {
       painter: _CircularProgressPainter(
         progress: progress,
         strokeWidth: strokeWidth,
-        backgroundColor: AppColors.primary.withAlpha(26), // 0.1 opacity
+        backgroundColor: AppColors.primary.withAlpha(26),
         progressColor: AppColors.primary,
       ),
       child: Container(),
@@ -208,7 +297,7 @@ class _CircularProgressPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
-    if (radius <= 0) return; // Do not paint if radius is not positive
+    if (radius <= 0) return; 
 
     final backgroundPaint = Paint()..color = backgroundColor..strokeWidth = strokeWidth..style = PaintingStyle.stroke;
     canvas.drawCircle(center, radius, backgroundPaint);
@@ -255,7 +344,7 @@ class _MacronutrientCard extends StatelessWidget {
               child: LinearProgressIndicator(
                 value: percentage,
                 minHeight: 6,
-                backgroundColor: color.withAlpha(38), // 0.15 opacity
+                backgroundColor: color.withAlpha(38),
                 color: color,
               ),
             ),
