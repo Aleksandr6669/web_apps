@@ -111,6 +111,10 @@ class _MealSummaryCard extends StatelessWidget {
     const double carbsGoal = 100;
     const double fatGoal = 30;
 
+    final carbsPercent = carbsGoal > 0 ? (totalNutrients.carbs / carbsGoal).clamp(0.0, 1.0) : 0.0;
+    final proteinPercent = proteinGoal > 0 ? (totalNutrients.protein / proteinGoal).clamp(0.0, 1.0) : 0.0;
+    final fatPercent = fatGoal > 0 ? (totalNutrients.fat / fatGoal).clamp(0.0, 1.0) : 0.0;
+
     return Card(
       shape: RoundedRectangleBorder(borderRadius: AppStyles.largeBorderRadius),
       child: Padding(
@@ -121,11 +125,29 @@ class _MealSummaryCard extends StatelessWidget {
              const SizedBox(height: 20),
             Row(
               children: [
-                Expanded(child: _MacroCircle(label: 'Углеводы', amount: totalNutrients.carbs, goal: carbsGoal, color: AppColors.primary)),
+                Expanded(child: _MacronutrientCard(
+                  name: 'Углеводы',
+                  value: '${totalNutrients.carbs.round()}г',
+                  total: '${carbsGoal.round()}г',
+                  percentage: carbsPercent,
+                  color: AppColors.primary
+                )),
                 const SizedBox(width: 12),
-                Expanded(child: _MacroCircle(label: 'Белки', amount: totalNutrients.protein, goal: proteinGoal, color: Colors.orange)),
+                Expanded(child: _MacronutrientCard(
+                  name: 'Белки',
+                  value: '${totalNutrients.protein.round()}г',
+                  total: '${proteinGoal.round()}г',
+                  percentage: proteinPercent,
+                  color: Colors.orange
+                )),
                 const SizedBox(width: 12),
-                Expanded(child: _MacroCircle(label: 'Жиры', amount: totalNutrients.fat, goal: fatGoal, color: Colors.blue)),
+                Expanded(child: _MacronutrientCard(
+                  name: 'Жиры',
+                  value: '${totalNutrients.fat.round()}г',
+                  total: '${fatGoal.round()}г',
+                  percentage: fatPercent,
+                  color: Colors.blue
+                )),
               ],
             ),
           ],
@@ -135,38 +157,51 @@ class _MealSummaryCard extends StatelessWidget {
   }
 }
 
-class _MacroCircle extends StatelessWidget {
-  final String label;
-  final double amount;
-  final double goal;
+class _MacronutrientCard extends StatelessWidget {
+  final String name;
+  final String value;
+  final String total;
+  final double percentage;
   final Color color;
 
-  const _MacroCircle({required this.label, required this.amount, required this.goal, required this.color});
+  const _MacronutrientCard({
+    required this.name,
+    required this.value,
+    required this.total,
+    required this.percentage,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final progress = goal > 0 ? (amount / goal).clamp(0.0, 1.0) : 0.0;
-    return Column(
-      children: [
-        SizedBox(
-          width: 260, height: 260,
-          child: Stack(
-            alignment: Alignment.center,
+    return Container(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(name, style: theme.textTheme.titleMedium),
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              CircularProgressIndicator(
-                value: progress,
-                strokeWidth: 6,
-                backgroundColor: color.withOpacity(0.15),
-                color: color,
-              ),
-              Text('${amount.round()}г', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+              Text(value, style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.bold)),
+              Text('/ $total', style: theme.textTheme.bodyMedium?.copyWith(color: theme.textTheme.bodySmall?.color)),
             ],
-          )
-        ),
-        const SizedBox(height: 8),
-        Text(label, style: theme.textTheme.bodyMedium)
-      ],
+          ),
+          const SizedBox(height: 8),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(10),
+            child: LinearProgressIndicator(
+              value: percentage,
+              minHeight: 8,
+              backgroundColor: color.withOpacity(0.2),
+              color: color,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
