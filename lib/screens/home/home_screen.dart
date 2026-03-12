@@ -118,7 +118,7 @@ class _CaloriesCard extends StatelessWidget {
         const SizedBox(height: 8),
         Text(value, style: theme.textTheme.titleLarge?.copyWith(fontSize: 18, color: theme.colorScheme.onSurface)),
         const SizedBox(height: 2),
-        Text(label, style: theme.textTheme.labelSmall?.copyWith(color: theme.textTheme.bodySmall?.color)),
+        Text(label, style: theme.textTheme.labelSmall?.copyWith(fontSize: 10, color: theme.textTheme.bodySmall?.color)),
       ],
     );
   }
@@ -313,7 +313,7 @@ class _MealCard extends StatelessWidget {
                   children: [
                     Text(name, style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface)),
                     const SizedBox(height: 2),
-                    Text('Реком: $recommended ккал', style: theme.textTheme.bodyMedium?.copyWith(fontSize: 11, color: theme.textTheme.bodySmall?.color)),
+                    Text('Реком: $recommended ккал', style: theme.textTheme.bodyMedium?.copyWith(fontSize: 10, color: theme.textTheme.bodySmall?.color)),
                   ],
                 ),
               ),
