@@ -70,11 +70,13 @@ class _BottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final BorderRadius borderRadius = BorderRadius.circular(30);
+
     return Container(
       height: 90,
       margin: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        borderRadius: AppStyles.defaultBorderRadius,
+        borderRadius: borderRadius,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withAlpha(26),
@@ -85,7 +87,7 @@ class _BottomNavBar extends StatelessWidget {
         ],
       ),
       child: ClipRRect(
-        borderRadius: AppStyles.defaultBorderRadius,
+        borderRadius: borderRadius,
         child: BackdropFilter(
           filter: ImageFilter.blur(sigmaX: 10.0, sigmaY: 10.0),
           child: Container(
