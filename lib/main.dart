@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'dart:ui';
 import 'screens/home/home_screen.dart';
+import 'screens/recipes/recipes_screen.dart';
 import 'styles/app_colors.dart';
 import 'styles/app_styles.dart';
 
@@ -36,8 +37,8 @@ class _MainScreenState extends State<MainScreen> {
 
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
+    RecipesScreen(),
     // TODO: Add other screens here
-    Center(child: Text('Recipes Screen')),
     Center(child: Text('Analysis Screen')),
     Center(child: Text('Profile Screen')),
   ];
