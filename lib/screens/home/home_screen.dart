@@ -198,6 +198,13 @@ class _MealsSection extends StatelessWidget {
           const SizedBox(height: 12),
           const _MealCard(name: 'Перекус', recommended: '150 - 250', calories: '0', icon: Symbols.cookie, iconBg: Color(0xFFFCE7F3), iconColor: Colors.pink),
           const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text('Врием воды', style: theme.textTheme.headlineSmall?.copyWith(color: theme.colorScheme.onSurface)),
+            ],
+          ),
           _WaterCard(liters: (glassesDrunk * litersPerGlass), onAdd: onAddGlass),
          
       ],
