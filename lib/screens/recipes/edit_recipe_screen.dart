@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../models/food_item.dart';
 import '../../models/recipe.dart';
-import '../../widgets/icon_picker_dialog.dart'; // Import the new widget
+import '../../widgets/icon_picker_dialog.dart'; 
 
 class EditRecipeScreen extends StatefulWidget {
   final Recipe recipe;
@@ -67,31 +67,30 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
     super.dispose();
   }
 
-  double _parseCtrl(TextEditingController ctrl) {
-      return double.tryParse(ctrl.text.replaceAll(',', '.')) ?? 0;
-  }
+  double _parseDouble(String text) => double.tryParse(text.replaceAll(',', '.')) ?? 0.0;
+  int _parseInt(String text) => int.tryParse(text.replaceAll(',', '.')) ?? 0;
 
   void _saveChanges() {
     if (_formKey.currentState!.validate()) {
       final updatedNutrients = NutritionalInfo(
-        calories: _parseCtrl(_caloriesController).round(),
-        protein: _parseCtrl(_proteinController),
-        carbs: _parseCtrl(_carbsController),
-        sugar: _parseCtrl(_sugarController),
-        fiber: _parseCtrl(_fiberController),
-        fat: _parseCtrl(_fatController),
-        saturatedFat: _parseCtrl(_saturatedFatController),
-        polyunsaturatedFat: _parseCtrl(_polyunsaturatedFatController),
-        monounsaturatedFat: _parseCtrl(_monounsaturatedFatController),
-        transFat: _parseCtrl(_transFatController),
-        cholesterol: _parseCtrl(_cholesterolController),
-        sodium: _parseCtrl(_sodiumController),
-        potassium: _parseCtrl(_potassiumController),
-        vitaminA: _parseCtrl(_vitaminAController).round(),
-        vitaminC: _parseCtrl(_vitaminCController).round(),
-        vitaminD: _parseCtrl(_vitaminDController).round(),
-        calcium: _parseCtrl(_calciumController).round(),
-        iron: _parseCtrl(_ironController).round(),
+        calories: _parseDouble(_caloriesController.text),
+        protein: _parseDouble(_proteinController.text),
+        carbs: _parseDouble(_carbsController.text),
+        sugar: _parseDouble(_sugarController.text),
+        fiber: _parseDouble(_fiberController.text),
+        fat: _parseDouble(_fatController.text),
+        saturatedFat: _parseDouble(_saturatedFatController.text),
+        polyunsaturatedFat: _parseDouble(_polyunsaturatedFatController.text),
+        monounsaturatedFat: _parseDouble(_monounsaturatedFatController.text),
+        transFat: _parseDouble(_transFatController.text),
+        cholesterol: _parseDouble(_cholesterolController.text),
+        sodium: _parseDouble(_sodiumController.text),
+        potassium: _parseDouble(_potassiumController.text),
+        vitaminA: _parseInt(_vitaminAController.text),
+        vitaminC: _parseInt(_vitaminCController.text),
+        vitaminD: _parseInt(_vitaminDController.text),
+        calcium: _parseInt(_calciumController.text),
+        iron: _parseInt(_ironController.text),
       );
 
       final updatedRecipe = Recipe(
@@ -205,7 +204,7 @@ class _EditRecipeScreenState extends State<EditRecipeScreen> {
            child: Container(
              width: 80, height: 80,
              decoration: BoxDecoration(
-               color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+               color: Theme.of(context).colorScheme.primary.withAlpha(26), // 10% opacity
                shape: BoxShape.circle
              ),
              child: Icon(_selectedIcon, size: 40, color: Theme.of(context).colorScheme.primary),

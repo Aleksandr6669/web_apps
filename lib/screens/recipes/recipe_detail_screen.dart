@@ -52,7 +52,7 @@ class RecipeDetailScreen extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 40,
-                backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+                backgroundColor: theme.colorScheme.primary.withAlpha(26), // 10% opacity
                 child: Icon(recipe.icon, size: 40, color: theme.colorScheme.primary),
               ),
               const SizedBox(height: 16),
@@ -84,25 +84,25 @@ class RecipeDetailScreen extends StatelessWidget {
             _buildDivider(),
             _buildDetailRow(theme, 'Белки', '${nutrients.protein.toStringAsFixed(1)} г'),
             _buildDetailRow(theme, 'Углеводы', '${nutrients.carbs.toStringAsFixed(1)} г'),
-            _buildDetailRow(theme, '   в т.ч. Сахар', '${(nutrients.sugar ?? 0).toStringAsFixed(1)} г', isSub: true),
-            _buildDetailRow(theme, '   в т.ч. Клетчатка', '${(nutrients.fiber ?? 0).toStringAsFixed(1)} г', isSub: true),
+            _buildDetailRow(theme, '   в т.ч. Сахар', '${nutrients.sugar.toStringAsFixed(1)} г', isSub: true),
+            _buildDetailRow(theme, '   в т.ч. Клетчатка', '${nutrients.fiber.toStringAsFixed(1)} г', isSub: true),
             _buildDivider(),
             _buildDetailRow(theme, 'Жиры', '${nutrients.fat.toStringAsFixed(1)} г'),
-            _buildDetailRow(theme, '   Насыщенные', '${(nutrients.saturatedFat ?? 0).toStringAsFixed(1)} г', isSub: true),
-            _buildDetailRow(theme, '   Полиненасыщенные', '${(nutrients.polyunsaturatedFat ?? 0).toStringAsFixed(1)} г', isSub: true),
-            _buildDetailRow(theme, '   Мононенасыщенные', '${(nutrients.monounsaturatedFat ?? 0).toStringAsFixed(1)} г', isSub: true),
-            _buildDetailRow(theme, '   Трансжиры', '${(nutrients.transFat ?? 0).toStringAsFixed(1)} г', isSub: true),
-             if ((nutrients.cholesterol ?? 0) > 0 || (nutrients.sodium ?? 0) > 0) ...[
+            _buildDetailRow(theme, '   Насыщенные', '${nutrients.saturatedFat.toStringAsFixed(1)} г', isSub: true),
+            _buildDetailRow(theme, '   Полиненасыщенные', '${nutrients.polyunsaturatedFat.toStringAsFixed(1)} г', isSub: true),
+            _buildDetailRow(theme, '   Мононенасыщенные', '${nutrients.monounsaturatedFat.toStringAsFixed(1)} г', isSub: true),
+            _buildDetailRow(theme, '   Трансжиры', '${nutrients.transFat.toStringAsFixed(1)} г', isSub: true),
+             if (nutrients.cholesterol > 0 || nutrients.sodium > 0) ...[
                 _buildDivider(),
-                if ((nutrients.cholesterol ?? 0) > 0) _buildDetailRow(theme, 'Холестерин', '${(nutrients.cholesterol ?? 0).toStringAsFixed(0)} мг'),
-                if ((nutrients.sodium ?? 0) > 0) _buildDetailRow(theme, 'Натрий', '${(nutrients.sodium ?? 0).toStringAsFixed(0)} мг'),
+                if (nutrients.cholesterol > 0) _buildDetailRow(theme, 'Холестерин', '${nutrients.cholesterol.toStringAsFixed(0)} мг'),
+                if (nutrients.sodium > 0) _buildDetailRow(theme, 'Натрий', '${nutrients.sodium.toStringAsFixed(0)} мг'),
              ],
-             if ((nutrients.vitaminA ?? 0) > 0 || (nutrients.vitaminC ?? 0) > 0 || (nutrients.calcium ?? 0) > 0 || (nutrients.iron ?? 0) > 0) ...[
+             if (nutrients.vitaminA > 0 || nutrients.vitaminC > 0 || nutrients.calcium > 0 || nutrients.iron > 0) ...[
                 _buildDivider(),
-                if ((nutrients.vitaminA ?? 0) > 0) _buildDetailRow(theme, 'Витамин A', '${nutrients.vitaminA}%'),
-                if ((nutrients.vitaminC ?? 0) > 0) _buildDetailRow(theme, 'Витамин C', '${nutrients.vitaminC}%'),
-                if ((nutrients.calcium ?? 0) > 0) _buildDetailRow(theme, 'Кальций', '${nutrients.calcium}%'),
-                if ((nutrients.iron ?? 0) > 0) _buildDetailRow(theme, 'Железо', '${nutrients.iron}%'),
+                if (nutrients.vitaminA > 0) _buildDetailRow(theme, 'Витамин A', '${nutrients.vitaminA}%'),
+                if (nutrients.vitaminC > 0) _buildDetailRow(theme, 'Витамин C', '${nutrients.vitaminC}%'),
+                if (nutrients.calcium > 0) _buildDetailRow(theme, 'Кальций', '${nutrients.calcium}%'),
+                if (nutrients.iron > 0) _buildDetailRow(theme, 'Железо', '${nutrients.iron}%'),
              ]
           ],
         ),

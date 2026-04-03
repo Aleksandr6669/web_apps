@@ -59,20 +59,20 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
       _proteinController.text = nutrients.protein.toString();
       _carbsController.text = nutrients.carbs.toString();
       _fatController.text = nutrients.fat.toString();
-      _fiberController.text = nutrients.fiber.toString() ?? '';
-      _sugarController.text = nutrients.sugar.toString() ?? '';
-      _saturatedFatController.text = nutrients.saturatedFat.toString() ?? '';
-      _polyunsaturatedFatController.text = nutrients.polyunsaturatedFat.toString() ?? '';
-      _monounsaturatedFatController.text = nutrients.monounsaturatedFat.toString() ?? '';
-      _transFatController.text = nutrients.transFat.toString() ?? '';
-      _cholesterolController.text = nutrients.cholesterol.toString() ?? '';
-      _sodiumController.text = nutrients.sodium.toString() ?? '';
-      _potassiumController.text = nutrients.potassium.toString() ?? '';
-      _vitaminAController.text = nutrients.vitaminA.toString() ?? '';
-      _vitaminCController.text = nutrients.vitaminC.toString() ?? '';
-      _vitaminDController.text = nutrients.vitaminD.toString() ?? '';
-      _calciumController.text = nutrients.calcium.toString() ?? '';
-      _ironController.text = nutrients.iron.toString() ?? '';
+      _fiberController.text = nutrients.fiber.toString();
+      _sugarController.text = nutrients.sugar.toString();
+      _saturatedFatController.text = nutrients.saturatedFat.toString();
+      _polyunsaturatedFatController.text = nutrients.polyunsaturatedFat.toString();
+      _monounsaturatedFatController.text = nutrients.monounsaturatedFat.toString();
+      _transFatController.text = nutrients.transFat.toString();
+      _cholesterolController.text = nutrients.cholesterol.toString();
+      _sodiumController.text = nutrients.sodium.toString();
+      _potassiumController.text = nutrients.potassium.toString();
+      _vitaminAController.text = nutrients.vitaminA.toString();
+      _vitaminCController.text = nutrients.vitaminC.toString();
+      _vitaminDController.text = nutrients.vitaminD.toString();
+      _calciumController.text = nutrients.calcium.toString();
+      _ironController.text = nutrients.iron.toString();
     }
   }
 
@@ -104,7 +104,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
         description: _descriptionController.text,
         icon: _selectedIcon,
         nutrients: NutritionalInfo(
-          calories: _parseInt(_caloriesController.text),
+          calories: _parseDouble(_caloriesController.text),
           protein: _parseDouble(_proteinController.text),
           carbs: _parseDouble(_carbsController.text),
           fat: _parseDouble(_fatController.text),
@@ -174,7 +174,7 @@ class _AddRecipeScreenState extends State<AddRecipeScreen> {
                 borderRadius: BorderRadius.circular(50),
                 child: CircleAvatar(
                   radius: 40,
-                  backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  backgroundColor: Theme.of(context).colorScheme.primary.withAlpha(26), // 10% opacity
                   child: Icon(_selectedIcon, size: 40, color: Theme.of(context).colorScheme.primary),
                 ),
               ),

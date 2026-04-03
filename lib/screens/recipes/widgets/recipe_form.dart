@@ -64,7 +64,7 @@ class RecipeForm extends StatelessWidget {
   Widget _buildTextField(BuildContext context, TextEditingController controller, String label, {int maxLines = 1}) {
     final border = OutlineInputBorder(
       borderRadius: AppStyles.defaultBorderRadius,
-      borderSide: BorderSide(color: Theme.of(context).dividerColor.withOpacity(0.5)),
+      borderSide: BorderSide(color: Theme.of(context).dividerColor.withAlpha(128)), // 50% opacity
     );
     return TextFormField(
       controller: controller,

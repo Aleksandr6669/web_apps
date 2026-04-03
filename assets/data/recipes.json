@@ -1,0 +1,113 @@
+
+[
+  {
+    "name": "Овсянка с фруктами",
+    "description": "Полезный и сытный завтрак",
+    "icon": "breakfast_dining",
+    "nutrients": {
+      "calories": 350,
+      "protein": 10,
+      "carbs": 60,
+      "fat": 8
+    }
+  },
+  {
+    "name": "Куриная грудка на гриле",
+    "description": "С овощами и киноа",
+    "icon": "lunch_dining",
+    "nutrients": {
+      "calories": 450,
+      "protein": 50,
+      "carbs": 30,
+      "fat": 15
+    }
+  },
+  {
+    "name": "Салат Цезарь",
+    "description": "Классический рецепт с курицей",
+    "icon": "ramen_dining",
+    "nutrients": {
+      "calories": 400,
+      "protein": 30,
+      "carbs": 15,
+      "fat": 25
+    }
+  },
+  {
+    "name": "Смузи 'Зеленый детокс'",
+    "description": "Шпинат, яблоко, банан, вода",
+    "icon": "local_bar",
+    "nutrients": {
+      "calories": 150,
+      "protein": 5,
+      "carbs": 35,
+      "fat": 1
+    }
+  },
+  {
+    "name": "Лосось запеченный",
+    "description": "С лимоном и травами",
+    "icon": "set_meal",
+    "nutrients": {
+      "calories": 550,
+      "protein": 45,
+      "carbs": 5,
+      "fat": 40
+    }
+  },
+  {
+    "name": "Греческий салат",
+    "description": "Свежие овощи и фета",
+    "icon": "restaurant",
+    "nutrients": {
+      "calories": 300,
+      "protein": 8,
+      "carbs": 10,
+      "fat": 25
+    }
+  },
+  {
+    "name": "Паста Карбонара",
+    "description": "Сливочный соус и бекон",
+    "icon": "dinner_dining",
+    "nutrients": {
+      "calories": 600,
+      "protein": 25,
+      "carbs": 70,
+      "fat": 28
+    }
+  },
+  {
+    "name": "Протеиновый коктейль",
+    "description": "После тренировки",
+    "icon": "blender",
+    "nutrients": {
+      "calories": 250,
+      "protein": 30,
+      "carbs": 20,
+      "fat": 5
+    }
+  },
+  {
+    "name": "Чечевичный суп",
+    "description": "Насыщенный и ароматный",
+    "icon": "soup_kitchen",
+    "nutrients": {
+      "calories": 320,
+      "protein": 18,
+      "carbs": 55,
+      "fat": 4
+    }
+  },
+  {
+    "name": "Творожная запеканка",
+    "description": "С изюмом и сметаной",
+    "icon": "cake",
+    "nutrients": {
+      "calories": 280,
+      "protein": 20,
+      "carbs": 25,
+      "fat": 12
+    }
+  }
+]

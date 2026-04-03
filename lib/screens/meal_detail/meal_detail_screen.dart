@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../models/food_item.dart';
+import '../../models/recipe.dart';
 import '../../styles/app_colors.dart';
 import '../../styles/app_styles.dart';
+import '../recipes/recipe_detail_screen.dart';
 
 class MealDetailScreen extends StatelessWidget {
   final String mealName;
@@ -195,7 +197,7 @@ class _MacronutrientCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: percentage,
               minHeight: 8,
-              backgroundColor: color.withOpacity(0.2),
+              backgroundColor: color.withAlpha(51), // 20% opacity
               color: color,
             ),
           ),
@@ -253,37 +255,56 @@ class _FoodListItem extends StatelessWidget {
   final FoodItem item;
   const _FoodListItem({required this.item});
 
+  void _navigateToDetail(BuildContext context, FoodItem item) {
+    // Конвертируем FoodItem в Recipe, чтобы использовать существующий экран
+    final recipe = Recipe(
+      name: item.name,
+      description: item.description,
+      icon: item.icon,
+      nutrients: item.nutrients,
+    );
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => RecipeDetailScreen(recipe: recipe),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Card(
       shape: RoundedRectangleBorder(borderRadius: AppStyles.cardRadius),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-        child: Row(
-          children: [
-            Container(
-              width: 52, height: 52,
-              decoration: BoxDecoration(
-                color: AppColors.primary.withOpacity(0.1),
-                borderRadius: AppStyles.mediumBorderRadius,
+      child: InkWell(
+        borderRadius: AppStyles.cardRadius,
+        onTap: () => _navigateToDetail(context, item),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+          child: Row(
+            children: [
+              Container(
+                width: 52, height: 52,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withAlpha(26), // 10% opacity
+                  borderRadius: AppStyles.mediumBorderRadius,
+                ),
+                child: Icon(item.icon, color: AppColors.primary, size: 28),
               ),
-              child: Icon(item.icon, color: AppColors.primary, size: 28),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(item.name, style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 4),
-                  Text(item.description, style: theme.textTheme.bodyMedium?.copyWith(color: theme.textTheme.bodySmall?.color)),
-                ],
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(item.name, style: theme.textTheme.titleMedium),
+                    const SizedBox(height: 4),
+                    Text(item.description, style: theme.textTheme.bodyMedium?.copyWith(color: theme.textTheme.bodySmall?.color)),
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(width: 16),
-            Text('${item.nutrients.calories} ккал', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
-          ],
+              const SizedBox(width: 16),
+              Text('${item.nutrients.calories} ккал', style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.bold)),
+            ],
+          ),
         ),
       ),
     );

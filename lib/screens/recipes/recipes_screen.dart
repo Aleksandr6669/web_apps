@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import '../../models/recipe.dart';
-import '../../models/food_item.dart';
 import '../../styles/app_styles.dart';
-import '../../styles/app_colors.dart'; // Импортируем цвета
+import '../../services/recipe_service.dart';
 import 'add_recipe_screen.dart';
 import 'recipe_detail_screen.dart';
 
@@ -16,76 +15,26 @@ class RecipesScreen extends StatefulWidget {
 
 class _RecipesScreenState extends State<RecipesScreen> {
   final _searchController = TextEditingController();
-  late List<Recipe> _filteredRecipes;
-
-  final List<Recipe> _allRecipes = [
-    Recipe(
-      name: 'Овсянка с фруктами',
-      description: 'Полезный и сытный завтрак',
-      icon: Symbols.breakfast_dining,
-      nutrients: NutritionalInfo(calories: 350, protein: 10, carbs: 60, fat: 8),
-    ),
-    Recipe(
-      name: 'Куриная грудка на гриле',
-      description: 'С овощами и киноа',
-      icon: Symbols.lunch_dining,
-      nutrients: NutritionalInfo(calories: 450, protein: 50, carbs: 30, fat: 15),
-    ),
-    Recipe(
-      name: 'Салат Цезарь',
-      description: 'Классический рецепт с курицей',
-      icon: Symbols.ramen_dining,
-      nutrients: NutritionalInfo(calories: 400, protein: 30, carbs: 15, fat: 25),
-    ),
-    Recipe(
-      name: 'Смузи "Зеленый детокс"',
-      description: 'Шпинат, яблоко, банан, вода',
-      icon: Symbols.local_bar,
-      nutrients: NutritionalInfo(calories: 150, protein: 5, carbs: 35, fat: 1),
-    ),
-    Recipe(
-      name: 'Лосось запеченный',
-      description: 'С лимоном и травами',
-      icon: Symbols.set_meal,
-      nutrients: NutritionalInfo(calories: 550, protein: 45, carbs: 5, fat: 40),
-    ),
-    Recipe(
-      name: 'Греческий салат',
-      description: 'Свежие овощи и фета',
-      icon: Symbols.restaurant,
-      nutrients: NutritionalInfo(calories: 300, protein: 8, carbs: 10, fat: 25),
-    ),
-    Recipe(
-      name: 'Паста Карбонара',
-      description: 'Сливочный соус и бекон',
-      icon: Symbols.dinner_dining,
-      nutrients: NutritionalInfo(calories: 600, protein: 25, carbs: 70, fat: 28),
-    ),
-    Recipe(
-      name: 'Протеиновый коктейль',
-      description: 'После тренировки',
-      icon: Symbols.blender,
-      nutrients: NutritionalInfo(calories: 250, protein: 30, carbs: 20, fat: 5),
-    ),
-    Recipe(
-      name: 'Чечевичный суп',
-      description: 'Насыщенный и ароматный',
-      icon: Symbols.soup_kitchen,
-      nutrients: NutritionalInfo(calories: 320, protein: 18, carbs: 55, fat: 4),
-    ),
-    Recipe(
-      name: 'Творожная запеканка',
-      description: 'С изюмом и сметаной',
-      icon: Symbols.cake,
-      nutrients: NutritionalInfo(calories: 280, protein: 20, carbs: 25, fat: 12),
-    ),
-  ];
+  final RecipeService _recipeService = RecipeService();
+  
+  late Future<List<Recipe>> _recipesFuture;
+  List<Recipe> _allRecipes = [];
+  List<Recipe> _filteredRecipes = [];
 
   @override
   void initState() {
     super.initState();
-    _filteredRecipes = _allRecipes;
+    _recipesFuture = _loadRecipes();
     _searchController.addListener(_filterRecipes);
+  }
+
+  Future<List<Recipe>> _loadRecipes() async {
+    final recipes = await _recipeService.loadRecipes();
+    setState(() {
+      _allRecipes = recipes;
+      _filteredRecipes = recipes;
+    });
+    return recipes;
   }
 
   @override
@@ -113,6 +62,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
       setState(() {
         _allRecipes.insert(0, newRecipe);
         _filterRecipes();
+        // TODO: Сохранить обновленный список в JSON
       });
     }
   }
@@ -130,6 +80,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
         if (originalIndex != -1) {
           _allRecipes[originalIndex] = updatedRecipe;
           _filterRecipes();
+          // TODO: Сохранить обновленный список в JSON
         }
       });
     }
@@ -176,7 +127,24 @@ class _RecipesScreenState extends State<RecipesScreen> {
           ),
         ],
       ),
-      body: _filteredRecipes.isEmpty ? _buildEmptyState() : _buildRecipesList(),
+      body: FutureBuilder<List<Recipe>>(
+        future: _recipesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Ошибка загрузки: ${snapshot.error}'));
+          }
+          if (snapshot.hasData && snapshot.data!.isEmpty) {
+            return _buildEmptyState(isInitial: true);
+          }
+
+          return _filteredRecipes.isEmpty 
+              ? _buildEmptyState(isInitial: _searchController.text.isEmpty) 
+              : _buildRecipesList();
+        },
+      ),
     );
   }
 
@@ -195,7 +163,7 @@ class _RecipesScreenState extends State<RecipesScreen> {
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState({bool isInitial = false}) {
     final isSearching = _searchController.text.isNotEmpty;
     return Center(
       child: Column(
@@ -213,7 +181,9 @@ class _RecipesScreenState extends State<RecipesScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            isSearching ? 'Попробуйте изменить запрос' : 'Нажмите +, чтобы добавить свой первый рецепт',
+            isSearching 
+              ? 'Попробуйте изменить запрос' 
+              : 'Нажмите +, чтобы добавить свой первый рецепт',
             style: Theme.of(context).textTheme.bodyMedium,
             textAlign: TextAlign.center,
           ),
@@ -241,11 +211,12 @@ class _RecipeListItem extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       child: ListTile(
+        onTap: onTap, 
         hoverColor: Colors.transparent, 
-        splashColor: theme.colorScheme.primary.withOpacity(0.1),
+        splashColor: theme.colorScheme.primary.withAlpha(26), // 10% opacity
         contentPadding: const EdgeInsets.only(left: 16, right: 8, top: 8, bottom: 8),
         leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primary.withOpacity(0.1),
+          backgroundColor: theme.colorScheme.primary.withAlpha(26), // 10% opacity
           child: Icon(
             recipe.icon,
             color: theme.colorScheme.primary,
@@ -261,11 +232,10 @@ class _RecipeListItem extends StatelessWidget {
               )
             : null,
         trailing: IconButton(
-          icon: const Icon(Symbols.edit, color: AppColors.primary), // <--- ИЗМЕНЕНИЕ ЦВЕТА
+          icon: const Icon(Symbols.edit),
           onPressed: onEdit,
           tooltip: 'Редактировать',
         ),
-        onTap: onTap,
       ),
     );
   }

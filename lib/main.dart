@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'dart:ui';
 import 'screens/home/home_screen.dart';
+import 'screens/profile/profile_screen.dart';
 import 'screens/recipes/recipes_screen.dart';
-import 'screens/stats/stats_screen.dart'; // Импортируем новый экран
+import 'screens/stats/stats_screen.dart'; 
 import 'styles/app_colors.dart';
 import 'styles/app_styles.dart';
 
-void main() {
-  // Эта строка может помочь решить проблему с загрузкой шрифтов в некоторых средах
+void main() async { // <--- Сделал асинхронным
+  WidgetsFlutterBinding.ensureInitialized(); // <--- Обязательно для асинхронного main
+  await initializeDateFormatting('ru_RU', null); // <--- Инициализация локали
   GoogleFonts.config.allowRuntimeFetching = false;
   runApp(const MyApp());
 }
@@ -41,8 +44,8 @@ class _MainScreenState extends State<MainScreen> {
   static const List<Widget> _widgetOptions = <Widget>[
     HomeScreen(),
     RecipesScreen(),
-    StatsScreen(), // <--- ЗАМЕНА
-    Center(child: Text('Profile Screen')),
+    StatsScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {

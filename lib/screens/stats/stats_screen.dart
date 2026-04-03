@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:material_symbols_icons/symbols.dart';
+
+import '../../models/daily_log.dart';
+import '../../models/user_profile.dart';
+import '../../services/daily_log_service.dart';
+import '../../services/profile_service.dart';
 import '../../styles/app_colors.dart';
 import '../../styles/app_styles.dart';
-import 'dart:math';
+import 'widgets/chart_legend_item.dart';
+import 'widgets/progress_card.dart';
 
 class StatsScreen extends StatefulWidget {
   const StatsScreen({super.key});
@@ -13,19 +19,71 @@ class StatsScreen extends StatefulWidget {
 }
 
 class _StatsScreenState extends State<StatsScreen> {
-  bool _isWeekly = true; // Переключатель Неделя/Месяц
+  bool _isWeekly = true;
+  final DailyLogService _logService = DailyLogService();
+  final ProfileService _profileService = ProfileService();
 
-  // --- Mock Data ---
-  List<double> get _weeklyCalories => [2100, 2300, 2200, 2500, 2400, 2600, 2000];
-  List<double> get _monthlyCalories => List.generate(30, (i) => 2000 + Random().nextDouble() * 600);
+  late Future<Map<String, dynamic>> _dataFuture;
 
-  List<double> get _weeklyWeight => [75.5, 75.2, 75.3, 75.0, 74.8, 74.9, 74.6];
-  List<double> get _monthlyWeight => List.generate(30, (i) => 75 - (i * 0.1) + (Random().nextDouble() * 0.4 - 0.2));
+  @override
+  void initState() {
+    super.initState();
+    _dataFuture = _loadData();
+  }
 
-  final double _avgCarbs = 45;
-  final double _avgProtein = 30;
-  final double _avgFat = 25;
-  // ---
+  Future<Map<String, dynamic>> _loadData() async {
+    final now = DateTime.now();
+    final startDate = _isWeekly
+        ? now.subtract(Duration(days: now.weekday - 1))
+        : DateTime(now.year, now.month, 1);
+    final endDate = _isWeekly 
+        ? startDate.add(const Duration(days: 6)) 
+        : DateTime(now.year, now.month + 1, 0);
+
+    final logs = await _logService.getLogsForPeriod(startDate, endDate);
+    final profile = await _profileService.loadProfile();
+
+    final caloriesData = logs.map((log) => log.totalNutrients.calories).toList();
+    final weightData = logs.map((log) => log.weight ?? 0.0).toList();
+    
+    int logCount = logs.where((log) => !log.isEmpty).length;
+    if (logCount == 0) logCount = 1;
+
+    final totalCarbs = logs.fold<double>(0, (sum, log) => sum + log.totalNutrients.carbs);
+    final totalProtein = logs.fold<double>(0, (sum, log) => sum + log.totalNutrients.protein);
+    final totalFat = logs.fold<double>(0, (sum, log) => sum + log.totalNutrients.fat);
+    final totalMacros = totalCarbs + totalProtein + totalFat;
+
+    final avgCarbs = totalMacros > 0 ? (totalCarbs / totalMacros) * 100 : 0;
+    final avgProtein = totalMacros > 0 ? (totalProtein / totalMacros) * 100 : 0;
+    final avgFat = totalMacros > 0 ? (totalFat / totalMacros) * 100 : 0;
+
+    final avgSteps = logs.fold<int>(0, (sum, log) => sum + log.steps) ~/ logCount;
+    final latestWeightLog = logs.lastWhere((log) => log.weight != null, orElse: () => DailyLog.empty(now));
+    final latestWeight = latestWeightLog.weight ?? profile.weight;
+    final workouts = logs.where((log) => log.activityCalories > 0).length;
+    final avgWater = logs.fold<int>(0, (sum, log) => sum + log.waterIntake) ~/ logCount;
+
+    return {
+      'calories': caloriesData,
+      'weight': weightData,
+      'avgCarbs': avgCarbs,
+      'avgProtein': avgProtein,
+      'avgFat': avgFat,
+      'avgSteps': avgSteps,
+      'latestWeight': latestWeight,
+      'workouts': workouts,
+      'avgWater': avgWater,
+      'profile': profile,
+    };
+  }
+
+  void _onPeriodChanged(bool isWeekly) {
+    setState(() {
+      _isWeekly = isWeekly;
+      _dataFuture = _loadData();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,183 +92,107 @@ class _StatsScreenState extends State<StatsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Аналитика'),
-        centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 120), // Увеличен нижний отступ
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _buildPeriodToggle(theme),
-            const SizedBox(height: 24),
-            Text('Динамика калорий', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 16),
-            _buildCaloriesChart(theme),
-            const SizedBox(height: 24),
-            Text('Динамика веса', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 16),
-            _buildWeightChart(theme),
-            const SizedBox(height: 24),
-            Text('Среднее БЖУ', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 16),
-            _buildPieChartAndLegend(theme),
-            const SizedBox(height: 24),
-            Text('Прогресс', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 16),
-            _buildProgressCards(theme),
-            const SizedBox(height: 16), // Уменьшен отступ
-            Text('Отчет от AI', style: theme.textTheme.titleLarge),
-            const SizedBox(height: 16),
-            _buildAiReportCard(theme),
-          ],
-        ),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _dataFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return Center(child: Text('Ошибка загрузки данных: ${snapshot.error}'));
+          }
+          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+            return const Center(child: Text('Нет данных для анализа.'));
+          }
+
+          final data = snapshot.data!;
+          final UserProfile profile = data['profile'];
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 120),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildPeriodToggle(theme),
+                const SizedBox(height: 24),
+                Text('Динамика калорий', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 16),
+                _buildCaloriesChart(theme, data['calories'], profile.calorieGoal.toDouble()),
+                const SizedBox(height: 24),
+                Text('Динамика веса', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 16),
+                _buildWeightChart(theme, data['weight'], profile.weightGoal),
+                const SizedBox(height: 24),
+                Text('Среднее БЖУ', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 16),
+                _buildPieChartAndLegend(theme, data['avgCarbs'], data['avgProtein'], data['avgFat']),
+                const SizedBox(height: 24),
+                Text('Прогресс', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 16),
+                _buildProgressCards(theme, data['avgSteps'], data['latestWeight'], data['workouts'], data['avgWater'], profile),
+                const SizedBox(height: 24),
+                Text('Отчет от AI', style: theme.textTheme.headlineSmall),
+                const SizedBox(height: 16),
+                _buildAiReportCard(theme),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
 
   Widget _buildPeriodToggle(ThemeData theme) {
-    return Center(
-      child: ToggleButtons(
-        isSelected: [_isWeekly, !_isWeekly],
-        onPressed: (index) {
-          setState(() {
-            _isWeekly = index == 0;
-          });
-        },
-        borderRadius: AppStyles.defaultBorderRadius,
-        selectedColor: Colors.white,
-        fillColor: AppColors.primary,
-        color: AppColors.primary,
-        constraints: BoxConstraints(minWidth: (MediaQuery.of(context).size.width - 40) / 2, minHeight: 40),
-        children: const [
-          Text('Неделя'),
-          Text('Месяц'),
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: AppStyles.buttonRadius,
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: _ToggleButton(
+              text: 'Неделя',
+              isSelected: _isWeekly,
+              onTap: () => _onPeriodChanged(true),
+            ),
+          ),
+          Expanded(
+            child: _ToggleButton(
+              text: 'Месяц',
+              isSelected: !_isWeekly,
+              onTap: () => _onPeriodChanged(false),
+            ),
+          ),
         ],
       ),
     );
   }
-
-  Widget _buildCaloriesChart(ThemeData theme) {
-    final data = _isWeekly ? _weeklyCalories : _monthlyCalories;
-
-    return AspectRatio(
-      aspectRatio: 1.7,
-      child: Card(
-         shape: RoundedRectangleBorder(borderRadius: AppStyles.largeBorderRadius),
-         child: Padding(
-            padding: const EdgeInsets.only(top: 24, right: 24, bottom: 12, left: 12),
-           child: LineChart(
-              LineChartData(
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: List.generate(data.length, (i) => FlSpot(i.toDouble(), data[i])),
-                    isCurved: true,
-                    color: AppColors.primary,
-                    barWidth: 4,
-                    isStrokeCapRound: true,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(show: false),
-                  ),
-                ],
-                minY: 1500,
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: theme.dividerColor.withOpacity(0.5),
-                    strokeWidth: 1,
-                  ),
-                ),
-                titlesData: FlTitlesData(
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
-                  rightTitles: const AxisTitles(),
-                  topTitles: const AxisTitles(),
-                  bottomTitles: AxisTitles(sideTitles: _bottomTitles()),
-                ),
-                borderData: FlBorderData(show: false),
-              ),
-            ),
-         ),
-      ),
+  
+  Widget _buildCaloriesChart(ThemeData theme, List<double> calories, double goal) {
+    return _LineChart(
+        data: calories,
+        goal: goal,
+        lineColor: AppColors.primary,
+        gradientColor: AppColors.primary.withOpacity(0.3),
+        labels: _isWeekly ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] : null,
     );
   }
 
-  Widget _buildWeightChart(ThemeData theme) {
-    final data = _isWeekly ? _weeklyWeight : _monthlyWeight;
-    final minY = data.reduce(min).floorToDouble() - 1;
-    final maxY = data.reduce(max).ceilToDouble() + 1;
-
-    return AspectRatio(
-      aspectRatio: 1.7,
-      child: Card(
-         shape: RoundedRectangleBorder(borderRadius: AppStyles.largeBorderRadius),
-         child: Padding(
-            padding: const EdgeInsets.only(top: 24, right: 24, bottom: 12, left: 12),
-           child: LineChart(
-              LineChartData(
-                lineBarsData: [
-                  LineChartBarData(
-                    spots: List.generate(data.length, (i) => FlSpot(i.toDouble(), data[i])),
-                    isCurved: true,
-                    color: Colors.green.shade600,
-                    barWidth: 4,
-                    isStrokeCapRound: true,
-                    dotData: const FlDotData(show: false),
-                    belowBarData: BarAreaData(show: false),
-                  ),
-                ],
-                minY: minY,
-                maxY: maxY,
-                gridData: FlGridData(
-                  show: true,
-                  drawVerticalLine: false,
-                  getDrawingHorizontalLine: (value) => FlLine(
-                    color: theme.dividerColor.withOpacity(0.5),
-                    strokeWidth: 1,
-                  ),
-                ),
-                titlesData: FlTitlesData(
-                  leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: true, reservedSize: 40)),
-                  rightTitles: const AxisTitles(),
-                  topTitles: const AxisTitles(),
-                  bottomTitles: AxisTitles(sideTitles: _bottomTitles()),
-                ),
-                borderData: FlBorderData(show: false),
-              ),
-            ),
-         ),
-      ),
+  Widget _buildWeightChart(ThemeData theme, List<double> weightData, double goal) {
+     return _LineChart(
+        data: weightData.where((w) => w > 0).toList(),
+        goal: goal,
+        lineColor: Colors.orange,
+        gradientColor: Colors.orange.withOpacity(0.3),
+        labels: _isWeekly ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] : null,
+        isWeight: true,
     );
   }
 
-
-  SideTitles _bottomTitles() {
-    return SideTitles(
-      showTitles: true,
-      reservedSize: 30,
-      interval: 1,
-      getTitlesWidget: (double value, TitleMeta meta) {
-        String text = '';
-        if (_isWeekly) {
-          const days = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-          if (value.toInt() < days.length) {
-             text = days[value.toInt()];
-          }
-        } else {
-          if ((value.toInt() + 1) % 5 == 0) {
-            text = (value.toInt() + 1).toString();
-          }
-        }
-        return SideTitleWidget(
-          meta: meta, 
-          space: 4,
-          child: Text(text, style: const TextStyle(fontSize: 12)),
-        );
-      },
-    );
-  }
-
-  Widget _buildPieChartAndLegend(ThemeData theme) {
+  Widget _buildPieChartAndLegend(ThemeData theme, double carbs, double protein, double fat) {
+    final hasData = carbs + protein + fat > 0;
     return Card(
       shape: RoundedRectangleBorder(borderRadius: AppStyles.largeBorderRadius),
       child: Padding(
@@ -219,120 +201,81 @@ class _StatsScreenState extends State<StatsScreen> {
           children: [
             Expanded(
               flex: 2,
-              child: AspectRatio(
-                aspectRatio: 1,
-                child: PieChart(
-                  PieChartData(
-                    sections: [
-                      PieChartSectionData(value: _avgCarbs, color: AppColors.primary, title: '${_avgCarbs.round()}%', radius: 40, titleStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                      PieChartSectionData(value: _avgProtein, color: Colors.orange, title: '${_avgProtein.round()}%', radius: 40, titleStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                      PieChartSectionData(value: _avgFat, color: Colors.blue, title: '${_avgFat.round()}%', radius: 40, titleStyle: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white)),
-                    ],
-                    centerSpaceRadius: 30,
-                    sectionsSpace: 2,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 24),
-            Expanded(
-              flex: 3,
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  _buildLegendItem(theme, AppColors.primary, 'Углеводы', '~${(2200 * _avgCarbs / 100 / 4).round()} г'),
+                  ChartLegendItem(color: AppColors.primary, text: 'Углеводы', percentage: carbs.round()),
                   const SizedBox(height: 12),
-                  _buildLegendItem(theme, Colors.orange, 'Белки', '~${(2200 * _avgProtein / 100 / 4).round()} г'),
+                  ChartLegendItem(color: Colors.orange, text: 'Белки', percentage: protein.round()),
                   const SizedBox(height: 12),
-                  _buildLegendItem(theme, Colors.blue, 'Жиры', '~${(2200 * _avgFat / 100 / 9).round()} г'),
+                  ChartLegendItem(color: Colors.blue, text: 'Жиры', percentage: fat.round()),
                 ],
               ),
-            )
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              flex: 3,
+              child: SizedBox(
+                height: 140,
+                child: hasData ? PieChart(
+                  PieChartData(
+                    sections: [
+                      PieChartSectionData(value: carbs, color: AppColors.primary, radius: 40, showTitle: false),
+                      PieChartSectionData(value: protein, color: Colors.orange, radius: 40, showTitle: false),
+                      PieChartSectionData(value: fat, color: Colors.blue, radius: 40, showTitle: false),
+                    ],
+                    centerSpaceRadius: 30,
+                    sectionsSpace: 4,
+                  ),
+                ) : Center(child: Text('Нет данных', style: theme.textTheme.bodySmall, textAlign: TextAlign.center,)),
+              ),
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildLegendItem(ThemeData theme, Color color, String name, String value) {
-    return Row(
-      children: [
-        Container(width: 12, height: 12, color: color),
-        const SizedBox(width: 8),
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(name, style: theme.textTheme.bodyMedium),
-            Text(value, style: theme.textTheme.bodySmall?.copyWith(color: theme.textTheme.bodySmall?.color)),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildProgressCards(ThemeData theme) {
+  Widget _buildProgressCards(ThemeData theme, int avgSteps, double latestWeight, int workouts, int avgWater, UserProfile profile) {
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 16,
-      mainAxisSpacing: 16,
-      childAspectRatio: 2.5,
-      padding: EdgeInsets.zero,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 1.6, 
       children: [
-        _buildProgressCard(theme, 'Шаги', '8,450', '+1.2к', true), 
-        _buildProgressCard(theme, 'Средний вес', '75.2 кг', '-0.8 кг', false),
-        _buildProgressCard(theme, 'Тренировки', '3 в нед.', '+1', true),
-        _buildProgressCard(theme, 'Выпито воды', '1.8 л', '+200 мл', true),
+        ProgressCard(icon: Symbols.footprint, title: 'Шаги', value: avgSteps.toString(), unit: 'в среднем', color: AppColors.primary, goal: profile.stepsGoal),
+        ProgressCard(icon: Symbols.weight, title: 'Вес', value: latestWeight.toStringAsFixed(1), unit: 'кг', color: Colors.orange, goal: profile.weightGoal.toInt(), isWeight: true),
+        ProgressCard(icon: Symbols.fitness_center, title: 'Активность', value: workouts.toString(), unit: _isWeekly ? 'в неделю' : 'в месяц', color: Colors.blue),
+        ProgressCard(icon: Symbols.water_drop, title: 'Вода', value: (avgWater / 1000).toStringAsFixed(1), unit: 'л, в среднем', color: Colors.lightBlue, goal: profile.waterGoal ~/ 1000),
       ],
-    );
-  }
-
-  Widget _buildProgressCard(ThemeData theme, String title, String value, String change, bool isPositive) {
-    final color = isPositive ? Colors.green.shade600 : Colors.red.shade600;
-    return Card(
-      shape: RoundedRectangleBorder(borderRadius: AppStyles.mediumBorderRadius),
-      child: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(title, style: theme.textTheme.labelMedium),
-            Row(
-               mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                 Text(value, style: theme.textTheme.titleLarge?.copyWith(fontSize: 18)),
-                 Text(change, style: theme.textTheme.bodyMedium?.copyWith(color: color, fontWeight: FontWeight.bold)),
-              ],
-            )
-          ],
-        ),
-      ),
     );
   }
 
   Widget _buildAiReportCard(ThemeData theme) {
     return Card(
-      shape: RoundedRectangleBorder(borderRadius: AppStyles.largeBorderRadius),
+      color: const Color.fromARGB(255, 147, 242, 154).withOpacity(0.08),
+      shape: RoundedRectangleBorder(
+        borderRadius: AppStyles.largeBorderRadius,
+        side: BorderSide(color: const Color.fromARGB(252, 179, 250, 209).withOpacity(0.2)),
+      ),
       child: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(20.0),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Icon(Symbols.auto_awesome, color: AppColors.primary, size: 32),
-            const SizedBox(width: 16),
+            const Icon(Symbols.smart_toy, color: AppColors.primary, size: 32, fill: 1),
+            const SizedBox(width: 6),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Еженедельный отчет', style: theme.textTheme.titleMedium),
-                  const SizedBox(height: 8),
+                  Text('Анализ недели', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(1), fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 6),
                   Text(
-                    'Отличная работа на этой неделе! Ваш вес стабильно снижается, а калорийность остается в пределах нормы. Попробуйте добавить еще одну тренировку и увеличить количество шагов до 10 000 в день для лучшего результата.',
-                    style: theme.textTheme.bodyMedium,
+                    'Вы отлично справляетесь! Попробуйте добавить больше белка в рацион для лучших результатов.',
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13, color: theme.colorScheme.onSurface.withOpacity(0.8)),
                   ),
                 ],
               ),
@@ -342,5 +285,124 @@ class _StatsScreenState extends State<StatsScreen> {
       ),
     );
   }
+}
 
+class _ToggleButton extends StatelessWidget {
+  final String text;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  const _ToggleButton({required this.text, required this.isSelected, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Material(
+        color: isSelected ? AppColors.primary : theme.cardColor,
+        borderRadius: AppStyles.buttonRadius,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: AppStyles.buttonRadius,
+          child: Center(
+            child: Padding( 
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                text,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: isSelected ? AppColors.onPrimary : theme.colorScheme.onSurface.withOpacity(0.7),
+                  fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                ),
+              ), 
+            ),
+          ),
+        ),
+      );
+  }
+}
+
+class _LineChart extends StatelessWidget {
+  final List<double> data;
+  final double goal;
+  final Color lineColor;
+  final Color gradientColor;
+  final List<String>? labels;
+  final bool isWeight;
+
+  const _LineChart({required this.data, required this.goal, required this.lineColor, required this.gradientColor, this.labels, this.isWeight = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final hasData = data.where((d) => d > 0).isNotEmpty;
+
+    return AspectRatio(
+      aspectRatio: 1.7,
+      child: Card(
+        shape: RoundedRectangleBorder(borderRadius: AppStyles.largeBorderRadius),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 24, 12),
+          child: hasData ? LineChart(
+            LineChartData(
+              gridData: const FlGridData(show: false),
+              titlesData: FlTitlesData(
+                leftTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                bottomTitles: AxisTitles(
+                  sideTitles: SideTitles(
+                    showTitles: labels != null,
+                    reservedSize: 30,
+                    interval: 1,
+                    getTitlesWidget: (value, meta) {
+                      if (labels == null || value.toInt() >= labels!.length) return const SizedBox();
+                      return Padding(
+                        padding: const EdgeInsets.only(top: 10.0),
+                        child: Text(labels![value.toInt()], style: theme.textTheme.bodySmall),
+                      );
+                    },
+                  ),
+                ),
+              ),
+              borderData: FlBorderData(show: false),
+              lineBarsData: [
+                LineChartBarData(
+                  spots: data.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value)).toList(),
+                  isCurved: true,
+                  color: lineColor,
+                  barWidth: 4,
+                  isStrokeCapRound: true,
+                  dotData: const FlDotData(show: false),
+                  belowBarData: BarAreaData(
+                    show: true,
+                    gradient: LinearGradient(
+                      colors: [gradientColor, gradientColor.withOpacity(0)],
+                      begin: Alignment.topCenter,
+                      end: Alignment.bottomCenter,
+                    ),
+                  ),
+                ),
+              ],
+              extraLinesData: ExtraLinesData(
+                horizontalLines: [
+                  HorizontalLine(
+                    y: goal,
+                    color: theme.dividerColor.withOpacity(0.8),
+                    strokeWidth: 2,
+                    dashArray: [8, 4],
+                    label: HorizontalLineLabel(
+                        show: true,
+                        alignment: Alignment.topRight,
+                        padding: const EdgeInsets.only(right: 5, bottom: 2),
+                        style: theme.textTheme.bodySmall?.copyWith(color: theme.dividerColor),
+                        labelResolver: (_) => isWeight ? 'Цель: ${goal.toStringAsFixed(1)} кг' : 'Цель: ${goal.toInt()} ккал',
+                    )
+                  ),
+                ],
+              ),
+            ),
+          ) : const Center(child: Text('Нет данных для отображения', style: TextStyle(color: Colors.grey))),
+        ),
+      ),
+    );
+  }
 }

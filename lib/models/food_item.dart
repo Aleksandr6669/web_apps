@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class NutritionalInfo {
-  final int calories;
+  final double calories;
   final double protein;
   final double carbs;
   final double fat;
@@ -42,6 +42,29 @@ class NutritionalInfo {
     this.calcium = 0,
     this.iron = 0,
   });
+
+  factory NutritionalInfo.fromJson(Map<String, dynamic> json) {
+    return NutritionalInfo(
+      calories: (json['calories'] as num?)?.toDouble() ?? 0.0,
+      protein: (json['protein'] as num?)?.toDouble() ?? 0.0,
+      carbs: (json['carbs'] as num?)?.toDouble() ?? 0.0,
+      fat: (json['fat'] as num?)?.toDouble() ?? 0.0,
+      saturatedFat: (json['saturatedFat'] as num?)?.toDouble() ?? 0.0,
+      polyunsaturatedFat: (json['polyunsaturatedFat'] as num?)?.toDouble() ?? 0.0,
+      monounsaturatedFat: (json['monounsaturatedFat'] as num?)?.toDouble() ?? 0.0,
+      transFat: (json['transFat'] as num?)?.toDouble() ?? 0.0,
+      cholesterol: (json['cholesterol'] as num?)?.toDouble() ?? 0.0,
+      sodium: (json['sodium'] as num?)?.toDouble() ?? 0.0,
+      potassium: (json['potassium'] as num?)?.toDouble() ?? 0.0,
+      fiber: (json['fiber'] as num?)?.toDouble() ?? 0.0,
+      sugar: (json['sugar'] as num?)?.toDouble() ?? 0.0,
+      vitaminA: (json['vitaminA'] as num?)?.toInt() ?? 0,
+      vitaminC: (json['vitaminC'] as num?)?.toInt() ?? 0,
+      vitaminD: (json['vitaminD'] as num?)?.toInt() ?? 0,
+      calcium: (json['calcium'] as num?)?.toInt() ?? 0,
+      iron: (json['iron'] as num?)?.toInt() ?? 0,
+    );
+  }
 
   // Helper to create an empty info object
   static NutritionalInfo get zero => NutritionalInfo(calories: 0, protein: 0, carbs: 0, fat: 0);
