@@ -1,8 +1,10 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'dart:ui';
+import 'firebase_options.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/profile/profile_screen.dart';
 import 'screens/recipes/recipes_screen.dart';
@@ -10,9 +12,12 @@ import 'screens/stats/stats_screen.dart';
 import 'styles/app_colors.dart';
 import 'styles/app_styles.dart';
 
-void main() async { // <--- Сделал асинхронным
-  WidgetsFlutterBinding.ensureInitialized(); // <--- Обязательно для асинхронного main
-  await initializeDateFormatting('ru_RU', null); // <--- Инициализация локали
+void main() async { 
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await initializeDateFormatting('ru_RU', null); 
   GoogleFonts.config.allowRuntimeFetching = false;
   runApp(const MyApp());
 }

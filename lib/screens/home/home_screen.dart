@@ -265,7 +265,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Center(
                     child: Text(
                       '${day.day}',
-                      style: TextStyle().copyWith(
+                      style: const TextStyle().copyWith(
                         color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
@@ -305,7 +305,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Center(
                   child: Text(
                     '${day.day}',
-                    style: TextStyle().copyWith(
+                    style: const TextStyle().copyWith(
                       color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),

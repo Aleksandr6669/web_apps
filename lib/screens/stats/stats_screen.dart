@@ -1,9 +1,11 @@
+import 'dart:developer' as developer;
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../../models/daily_log.dart';
 import '../../models/user_profile.dart';
+import '../../services/ai_service.dart';
 import '../../services/daily_log_service.dart';
 import '../../services/profile_service.dart';
 import '../../styles/app_colors.dart';
@@ -22,6 +24,7 @@ class _StatsScreenState extends State<StatsScreen> {
   bool _isWeekly = true;
   final DailyLogService _logService = DailyLogService();
   final ProfileService _profileService = ProfileService();
+  final AiService _aiService = AiService();
 
   late Future<Map<String, dynamic>> _dataFuture;
 
@@ -32,19 +35,32 @@ class _StatsScreenState extends State<StatsScreen> {
   }
 
   Future<Map<String, dynamic>> _loadData() async {
+    developer.log('Starting to load data for stats screen...', name: 'StatsScreen');
     final now = DateTime.now();
     final startDate = _isWeekly
-        ? now.subtract(Duration(days: now.weekday - 1))
-        : DateTime(now.year, now.month, 1);
+        ? DateTime.utc(now.year, now.month, now.day).subtract(Duration(days: now.weekday - 1))
+        : DateTime.utc(now.year, now.month, 1);
     final endDate = _isWeekly 
         ? startDate.add(const Duration(days: 6)) 
-        : DateTime(now.year, now.month + 1, 0);
+        : DateTime.utc(now.year, now.month + 1, 0);
+
+    developer.log('Period: $_isWeekly | Start: $startDate, End: $endDate', name: 'StatsScreen');
 
     final logs = await _logService.getLogsForPeriod(startDate, endDate);
+    developer.log('Loaded ${logs.length} logs from the service.', name: 'StatsScreen');
+    if (logs.isNotEmpty) {
+      for (var log in logs) {
+        developer.log('Log for ${log.date}: Calories=${log.totalNutrients.calories}, Weight=${log.weight}', name: 'StatsScreen.LogDetails');
+      }
+    }
+
     final profile = await _profileService.loadProfile();
+    developer.log('Loaded profile for ${profile.userName}.', name: 'StatsScreen');
 
     final caloriesData = logs.map((log) => log.totalNutrients.calories).toList();
     final weightData = logs.map((log) => log.weight ?? 0.0).toList();
+    developer.log('Processed calories data: $caloriesData', name: 'StatsScreen');
+    developer.log('Processed weight data: $weightData', name: 'StatsScreen');
     
     int logCount = logs.where((log) => !log.isEmpty).length;
     if (logCount == 0) logCount = 1;
@@ -64,7 +80,9 @@ class _StatsScreenState extends State<StatsScreen> {
     final workouts = logs.where((log) => log.activityCalories > 0).length;
     final avgWater = logs.fold<int>(0, (sum, log) => sum + log.waterIntake) ~/ logCount;
 
-    return {
+    final aiReport = await _aiService.getWeeklyAnalysis(logs, profile);
+
+    final result = {
       'calories': caloriesData,
       'weight': weightData,
       'avgCarbs': avgCarbs,
@@ -75,7 +93,10 @@ class _StatsScreenState extends State<StatsScreen> {
       'workouts': workouts,
       'avgWater': avgWater,
       'profile': profile,
+      'aiReport': aiReport,
     };
+    developer.log('Finished loading data. Result: $result', name: 'StatsScreen');
+    return result;
   }
 
   void _onPeriodChanged(bool isWeekly) {
@@ -100,9 +121,11 @@ class _StatsScreenState extends State<StatsScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
+            developer.log('Error in FutureBuilder: ${snapshot.error}', name: 'StatsScreen', error: snapshot.error, stackTrace: snapshot.stackTrace);
             return Center(child: Text('Ошибка загрузки данных: ${snapshot.error}'));
           }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          if (!snapshot.hasData || snapshot.data!.isEmpty || (snapshot.data!['calories'] as List).isEmpty) {
+             developer.log('FutureBuilder completed with no data.', name: 'StatsScreen');
             return const Center(child: Text('Нет данных для анализа.'));
           }
 
@@ -134,7 +157,7 @@ class _StatsScreenState extends State<StatsScreen> {
                 const SizedBox(height: 24),
                 Text('Отчет от AI', style: theme.textTheme.headlineSmall),
                 const SizedBox(height: 16),
-                _buildAiReportCard(theme),
+                _buildAiReportCard(theme, data['aiReport']),
               ],
             ),
           );
@@ -254,7 +277,7 @@ class _StatsScreenState extends State<StatsScreen> {
     );
   }
 
-  Widget _buildAiReportCard(ThemeData theme) {
+  Widget _buildAiReportCard(ThemeData theme, String aiReport) {
     return Card(
       color: const Color.fromARGB(255, 147, 242, 154).withAlpha(20),
       shape: RoundedRectangleBorder(
@@ -274,7 +297,7 @@ class _StatsScreenState extends State<StatsScreen> {
                   Text('Анализ недели', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(255), fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Text(
-                    'Вы отлично справляетесь! Попробуйте добавить больше белка в рацион для лучших результатов.',
+                    aiReport,
                     style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13, color: theme.colorScheme.onSurface.withAlpha(204)),
                   ),
                 ],
