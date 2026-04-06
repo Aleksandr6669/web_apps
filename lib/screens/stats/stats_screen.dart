@@ -175,7 +175,7 @@ class _StatsScreenState extends State<StatsScreen> {
         data: calories,
         goal: goal,
         lineColor: AppColors.primary,
-        gradientColor: AppColors.primary.withOpacity(0.3),
+        gradientColor: AppColors.primary.withAlpha(77),
         labels: _isWeekly ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] : null,
     );
   }
@@ -185,7 +185,7 @@ class _StatsScreenState extends State<StatsScreen> {
         data: weightData.where((w) => w > 0).toList(),
         goal: goal,
         lineColor: Colors.orange,
-        gradientColor: Colors.orange.withOpacity(0.3),
+        gradientColor: Colors.orange.withAlpha(77),
         labels: _isWeekly ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'] : null,
         isWeight: true,
     );
@@ -256,10 +256,10 @@ class _StatsScreenState extends State<StatsScreen> {
 
   Widget _buildAiReportCard(ThemeData theme) {
     return Card(
-      color: const Color.fromARGB(255, 147, 242, 154).withOpacity(0.08),
+      color: const Color.fromARGB(255, 147, 242, 154).withAlpha(20),
       shape: RoundedRectangleBorder(
         borderRadius: AppStyles.largeBorderRadius,
-        side: BorderSide(color: const Color.fromARGB(252, 179, 250, 209).withOpacity(0.2)),
+        side: BorderSide(color: const Color.fromARGB(252, 179, 250, 209).withAlpha(51)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(20.0),
@@ -271,11 +271,11 @@ class _StatsScreenState extends State<StatsScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Анализ недели', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface.withOpacity(1), fontWeight: FontWeight.bold)),
+                  Text('Анализ недели', style: theme.textTheme.titleMedium?.copyWith(color: theme.colorScheme.onSurface.withAlpha(255), fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
                   Text(
                     'Вы отлично справляетесь! Попробуйте добавить больше белка в рацион для лучших результатов.',
-                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13, color: theme.colorScheme.onSurface.withOpacity(0.8)),
+                    style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13, color: theme.colorScheme.onSurface.withAlpha(204)),
                   ),
                 ],
               ),
@@ -309,7 +309,7 @@ class _ToggleButton extends StatelessWidget {
               child: Text(
                 text,
                 style: theme.textTheme.titleMedium?.copyWith(
-                  color: isSelected ? AppColors.onPrimary : theme.colorScheme.onSurface.withOpacity(0.7),
+                  color: isSelected ? AppColors.onPrimary : theme.colorScheme.onSurface.withAlpha(178),
                   fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 ),
               ), 
@@ -375,7 +375,7 @@ class _LineChart extends StatelessWidget {
                   belowBarData: BarAreaData(
                     show: true,
                     gradient: LinearGradient(
-                      colors: [gradientColor, gradientColor.withOpacity(0)],
+                      colors: [gradientColor, gradientColor.withAlpha(0)],
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
                     ),
@@ -386,7 +386,7 @@ class _LineChart extends StatelessWidget {
                 horizontalLines: [
                   HorizontalLine(
                     y: goal,
-                    color: theme.dividerColor.withOpacity(0.8),
+                    color: theme.dividerColor.withAlpha(204),
                     strokeWidth: 2,
                     dashArray: [8, 4],
                     label: HorizontalLineLabel(

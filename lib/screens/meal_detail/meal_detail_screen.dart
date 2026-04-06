@@ -8,56 +8,13 @@ import '../recipes/recipe_detail_screen.dart';
 
 class MealDetailScreen extends StatelessWidget {
   final String mealName;
+  final List<FoodItem> items;
 
-  const MealDetailScreen({super.key, required this.mealName});
-
-  // Mock data for demonstration with detailed nutritional info
-  static final Map<String, List<FoodItem>> _mockData = {
-    'Завтрак': [
-      FoodItem(
-        icon: Symbols.local_cafe,
-        name: 'Кофе', 
-        description: 'Черный, без сахара', 
-        nutrients: NutritionalInfo(calories: 5, protein: 0.3, carbs: 0.8, fat: 0.1)
-      ),
-      FoodItem(
-        icon: Symbols.breakfast_dining, 
-        name: 'Овсянка', 
-        description: 'На воде с ягодами', 
-        nutrients: NutritionalInfo(calories: 150, protein: 5, carbs: 27, fat: 2.5, fiber: 4, sugar: 1, potassium: 150)
-      ),
-      FoodItem(
-        icon: Symbols.egg, 
-        name: 'Яичница', 
-        description: 'Из двух яиц', 
-        nutrients: NutritionalInfo(calories: 165, protein: 13, carbs: 1, fat: 11, saturatedFat: 3.5, cholesterol: 370, vitaminD: 10)
-      ),
-    ],
-    'Обед': [
-       FoodItem(
-        icon: Symbols.restaurant,
-        name: 'Грибной суп',
-        description: '250 мл',
-        nutrients: NutritionalInfo(calories: 210, protein: 8, carbs: 15, fat: 13, saturatedFat: 5, sodium: 600, fiber: 3),
-      ),
-      FoodItem(
-        icon: Symbols.lunch_dining,
-        name: 'Куриная грудка',
-        description: 'Запеченная, 150г',
-        nutrients: NutritionalInfo(calories: 240, protein: 45, carbs: 0, fat: 5, saturatedFat: 1.5, cholesterol: 130, potassium: 400, iron: 6),
-      ),
-      FoodItem(
-        icon: Symbols.eco,
-        name: 'Салат овощной',
-        description: 'С оливковым маслом',
-        nutrients: NutritionalInfo(calories: 70, protein: 1, carbs: 8, fat: 4, monounsaturatedFat: 3, fiber: 2, vitaminA: 25, vitaminC: 30),
-      ),
-    ],
-  };
+  const MealDetailScreen({super.key, required this.mealName, required this.items});
 
   @override
   Widget build(BuildContext context) {
-    final foodItems = _mockData[mealName] ?? [];
+    final foodItems = items;
     final totalNutrients = foodItems.fold<NutritionalInfo>(
       NutritionalInfo.zero,
       (sum, item) => sum + item.nutrients,

@@ -12,6 +12,7 @@ import '../../services/profile_service.dart';
 import '../../styles/app_colors.dart';
 import '../../styles/app_styles.dart';
 import '../meal_detail/meal_detail_screen.dart';
+import '../../models/food_item.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -193,7 +194,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
                   child: Container(
-                    color: Colors.black.withOpacity(0.15),
+                    color: Colors.black.withAlpha(38),
                   ),
                 ),
               ),
@@ -215,7 +216,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCalendarWidget() {
     return Card(
       elevation: 10,
-      shadowColor: Colors.black.withOpacity(0.3),
+      shadowColor: Colors.black.withAlpha(76),
       shape: RoundedRectangleBorder(borderRadius: AppStyles.largeBorderRadius),
       child: TableCalendar(
         locale: 'ru_RU',
@@ -236,34 +237,81 @@ class _HomeScreenState extends State<HomeScreen> {
           leftChevronIcon: Icon(Symbols.chevron_left, color: AppColors.primary),
           rightChevronIcon: Icon(Symbols.chevron_right, color: AppColors.primary),
         ),
-        calendarStyle: CalendarStyle(
+        calendarStyle: const CalendarStyle(
           todayDecoration: BoxDecoration(
-            color: AppColors.primary.withOpacity(0.3),
+            color: Color.fromARGB(76, 51, 102, 255),
             shape: BoxShape.circle,
           ),
-          selectedDecoration: const BoxDecoration(
+          selectedDecoration: BoxDecoration(
             color: AppColors.primary,
             shape: BoxShape.circle,
           ),
-          markersMaxCount: 0, // Убираем стандартные маркеры
         ),
         calendarBuilders: CalendarBuilders(
           markerBuilder: (context, date, events) {
-            if (events.isNotEmpty) {
-              // Кастомный маркер-подчеркивание
-              return Positioned(
-                bottom: 8,
+            return const SizedBox.shrink();
+          },
+          defaultBuilder: (context, day, focusedDay) {
+            final normalizedDay = DateTime.utc(day.year, day.month, day.day);
+            if (_loggedDates.any((d) => isSameDay(d, normalizedDay))) {
+              return Center(
                 child: Container(
-                  height: 4,
-                  width: 24,
+                  width: 36,
+                  height: 36,
                   decoration: BoxDecoration(
-                    color: Colors.orange.shade700,
-                    borderRadius: BorderRadius.circular(2),
+                    color: Colors.orange.withAlpha(76),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Text(
+                      '${day.day}',
+                      style: TextStyle().copyWith(
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
                   ),
                 ),
               );
             }
             return null;
+          },
+          selectedBuilder: (context, day, focusedDay) {
+            return Center(
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: const BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '${day.day}',
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                ),
+              ),
+            );
+          },
+          todayBuilder: (context, day, focusedDay) {
+            return Center(
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withAlpha(76),
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: Text(
+                    '${day.day}',
+                    style: TextStyle().copyWith(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                  ),
+                ),
+              ),
+            );
           },
         ),
       ),
@@ -444,6 +492,7 @@ class _MealsSection extends StatelessWidget {
           icon: details['icon'] as IconData,
           iconBg: details['iconBg'] as Color,
           iconColor: details['iconColor'] as Color,
+          items: items,
           onDataChanged: onDataChanged,
         ),
       );
@@ -618,6 +667,7 @@ class _MealCard extends StatelessWidget {
   final String mealName, recommended, calories;
   final IconData icon;
   final Color iconBg, iconColor;
+  final List<FoodItem> items;
   final VoidCallback onDataChanged;
 
   const _MealCard({
@@ -627,6 +677,7 @@ class _MealCard extends StatelessWidget {
     required this.icon, 
     required this.iconBg, 
     required this.iconColor,
+    required this.items,
     required this.onDataChanged
   });
 
@@ -638,7 +689,7 @@ class _MealCard extends StatelessWidget {
       onTap: () async {
         final result = await Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => MealDetailScreen(mealName: mealName)),
+          MaterialPageRoute(builder: (context) => MealDetailScreen(mealName: mealName, items: items)),
         );
         if (result == true) {
           onDataChanged();
@@ -683,7 +734,7 @@ class _MealCard extends StatelessWidget {
                   onTap: () async {
                      final result = await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => MealDetailScreen(mealName: mealName)),
+                        MaterialPageRoute(builder: (context) => MealDetailScreen(mealName: mealName, items: items)),
                       );
                       if (result == true) {
                         onDataChanged();
